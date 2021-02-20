@@ -10,6 +10,7 @@ UI.AddDropdown(["Misc.", "Aurora", "Aurora"], "Section", ["Anti-Aim", "Doubletap
 
 //Anti-Aim
 UI.AddDropdown(["Misc.", "Aurora", "Aurora"], "Anti-Aim Mode", ["None", "Simple", "Advanced", "Aurora"], 0);
+UI.AddCheckbox(["Misc.", "Aurora", "Aurora"], "E-Peek")
 UI.AddCheckbox(["Misc.", "Aurora", "Aurora"], "Low delta on slowwalk");
 UI.AddCheckbox(["Misc.", "Aurora", "Aurora"], "Shaking legs");
 
@@ -690,7 +691,7 @@ var currently_picking_hostage = false;
 var Aurora_aa = true;
 var key_e = false;
 
-function KratoEPeek() {
+function onEpeek() {
     var defusing = Entity.GetProp(Entity.GetLocalPlayer(), "CCSPlayer", "m_bIsDefusing")
     var picking_hostage = Entity.GetProp(Entity.GetLocalPlayer(), "CCSPlayer", "m_bIsGrabbingHostage")
     var holding = Entity.GetWeapon(Entity.GetLocalPlayer()) == 116;
@@ -754,7 +755,7 @@ function DefuseReset() {
     currently_picking_hostage = false;
 }
 
-Cheat.RegisterCallback("CreateMove", "KratoEPeek");
+Cheat.RegisterCallback("CreateMove", "onEpeek");
 Cheat.RegisterCallback("bomb_begindefuse", "Defusing");
 Cheat.RegisterCallback("round_start", "DefuseReset");
 Cheat.RegisterCallback("player_connect_full", "DefuseReset");
