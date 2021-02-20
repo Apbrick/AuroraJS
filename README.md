@@ -2,5 +2,5 @@
 
 * TODO:
 
-*> E-Peek \n
+*> E-Peek <br/>
 *> Dynamic Indicator Sorting at Crosshair
