@@ -1,4 +1,4 @@
-# AuroraJS
+## Aurora (Javascript version)
 
 * TODO:
 
