@@ -1,7 +1,7 @@
-# AuroraJS
+## Aurora (Javascript version)
 
-* TODO:
-
-*> E-Peek <br/>
-*> Dynamic Indicator Sorting at Crosshair<br/>
-*> Clantags
+#### To-do List:
+* Make possible anti-aim changes that make hitting more difficult
+* Dynamic sorting of indicators near the crosshairs
+* Clantag changer
+* E-Peek
