@@ -1,4 +1,4 @@
-//TODO: E-Peek, Dynamic Indicator Sorting at Crosshair
+//TODO: Dynamic Indicator Sorting at Crosshair
 var cached_fakelagState = UI.GetValue(["Rage", "Fake Lag", "General", "Enabled"]);
 var cached_fakelagLimit = UI.GetValue(["Rage", "Fake Lag", "General", "Limit"]);
 var cached_fakelagJitter = UI.GetValue(["Rage", "Fake Lag", "General", "Jitter"]);
@@ -10,7 +10,7 @@ UI.AddDropdown(["Misc.", "Aurora", "Aurora"], "Section", ["Anti-Aim", "Doubletap
 
 //Anti-Aim
 UI.AddDropdown(["Misc.", "Aurora", "Aurora"], "Anti-Aim Mode", ["None", "Simple", "Advanced", "Aurora"], 0);
-UI.AddCheckbox(["Misc.", "Aurora", "Aurora"], "E-Peek")
+UI.AddCheckbox(["Misc.", "Aurora", "Aurora"], "Legit AA on E")
 UI.AddCheckbox(["Misc.", "Aurora", "Aurora"], "Low delta on slowwalk");
 UI.AddCheckbox(["Misc.", "Aurora", "Aurora"], "Shaking legs");
 
@@ -709,7 +709,7 @@ function onEpeek() {
     if (!planted) {
         DefuseReset()
     }
-    if (!currently_defusing && !picking_hostage && UI.GetValue(["Misc.", "Aurora", "Aurora", "E-Peek"]) && Input.IsKeyPressed(45)) {
+    if (!currently_defusing && !picking_hostage && UI.GetValue(["Misc.", "Aurora", "Aurora", "Legit AA on E"]) && Input.IsKeyPressed(45)) {
         AntiAim.SetOverride(1);
         UI.SetValue(["Config", "Cheat", "General", "Restrictions"], 0);
         UI.SetValue(["Rage", "Anti Aim", "General", "Pitch mode"], 0);
