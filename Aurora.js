@@ -392,8 +392,30 @@ function stText() {
 
     return returnVar;
 }
-
 function onIndicators() {
+    // y value for indicators
+    if (getDropdownValue(UI.GetValue(["Misc.", "Aurora", "Aurora", "Indicators"]), 0)) {
+        aay = 25
+    } else if (getDropdownValue(UI.GetValue(["Misc.", "Aurora", "Aurora", "Indicators"]), 0) && (getDropdownValue(UI.GetValue(["Misc.", "Aurora", "Aurora", "Indicators"]), 1))) {
+        aay = 25
+        fly = 35
+    } else if (getDropdownValue(UI.GetValue(["Misc.", "Aurora", "Aurora", "Indicators"]), 0) && (getDropdownValue(UI.GetValue(["Misc.", "Aurora", "Aurora", "Indicators"]), 2))) {
+        aay = 25
+        dty = 35
+    }
+    else if (getDropdownValue(UI.GetValue(["Misc.", "Aurora", "Aurora", "Indicators"]), 1)) {
+        dty = 25
+    } else if (getDropdownValue(UI.GetValue(["Misc.", "Aurora", "Aurora", "Indicators"]), 1) && (getDropdownValue(UI.GetValue(["Misc.", "Aurora", "Aurora", "Indicators"]), 2))) {
+        fly = 25
+        dty = 35
+    } 
+        else if (getDropdownValue(UI.GetValue(["Misc.", "Aurora", "Aurora", "Indicators"]), 2)) {
+        fly = 25
+    } else if (getDropdownValue(UI.GetValue(["Misc.", "Aurora", "Aurora", "Indicators"]), 1) && getDropdownValue(UI.GetValue(["Misc.", "Aurora", "Aurora", "Indicators"]), 2) && getDropdownValue(UI.GetValue(["Misc.", "Aurora", "Aurora", "Indicators"]), 3)) {
+        aay = 25
+        dty = 35
+        fly = 45
+    }
     if (Entity.IsAlive(Entity.GetLocalPlayer())) {
         var font = Render.GetFont("verdana.ttf", 10, true);
         var x = (Global.GetScreenSize()[0] / 2);
@@ -403,16 +425,16 @@ function onIndicators() {
         if (getDropdownValue(UI.GetValue(["Misc.", "Aurora", "Aurora", "Indicators"]), 0)) {
             Render.String(x - 30, y + 15, 0, "Aurora", color, font);
             Render.String(x + 28, y + 15, 0, String(Math.round(Math.min(Local.GetRealYaw() - Local.GetFakeYaw()) / 2, 60)), color, font);
-            Render.String(x - 12, y + 25, 0, aaText(), color, font);
+            Render.String(x - 12, y + aay, 0, aaText(), color, font);
         }
 
         if (getDropdownValue(UI.GetValue(["Misc.", "Aurora", "Aurora", "Indicators"]), 1)) {
-            Render.String(x - 12, y + 35, 0, "   " + dtText(), color, font);
-            Render.String(x - 30, y + 35, 0, "DT", [184 - 35 * Exploit.GetCharge(), 6 + 178 * Exploit.GetCharge(), 6, 255], font);
+            Render.String(x - 12, y + dty, 0, "   " + dtText(), color, font);
+            Render.String(x - 30, y + dty, 0, "DT", [184 - 35 * Exploit.GetCharge(), 6 + 178 * Exploit.GetCharge(), 6, 255], font);
         }
 
         if (getDropdownValue(UI.GetValue(["Misc.", "Aurora", "Aurora", "Indicators"]), 2)) {
-            Render.String(x - 30, y + 45, 0, flText(), color, font);
+            Render.String(x - 30, y + fly, 0, flText(), color, font);
         }
     }
 }
