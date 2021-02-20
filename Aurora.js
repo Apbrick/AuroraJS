@@ -668,14 +668,14 @@ function onClantag() {
     var AuroraGS = ["A", "Au", "Aur", "Auro", "Auror", "Aurora", "Aurora", "Auror", "Auro", "Aur", "Au", "A", ""];
     var AuroraStatic = "Aurora"
 
-    if (UI.GetValue(["Misc.", "Aurora", "Aurora", "Clantag"]) == 1 && Globals.Tickcount() - oldTick > 16) {
+    if (UI.GetValue(getDropdownValue(["Misc.", "Aurora", "Aurora", "Clantag"]), 1) && Globals.Tickcount() - oldTick > 16) {
         Local.SetClanTag(AuroraStatic)
-    } else if (UI.GetValue(["Misc.", "Aurora", "Aurora", "Clantag"]) == 2 && Globals.Tickcount() - oldTick > 16) {
+    } else if (UI.GetValue(getDropdownValue(["Misc.", "Aurora", "Aurora", "Clantag"]), 2) && Globals.Tickcount() - oldTick > 16) {
         cur = Math.floor(Globals.Curtime() * 2 % 12 + 1);
         Local.SetClanTag(AuroraGS[cur]);
         oldTick = Globals.Tickcount();
         Globals.ChokedCommands() == 0;
-    } else if (UI.GetValue(["Misc.", "Aurora", "Aurora", "Clantag"]) == 3 && Globals.Tickcount() - oldTick > 16) {
+    } else if (UI.GetValue(getDropdownValue(["Misc.", "Aurora", "Aurora", "Clantag"]), 3) && Globals.Tickcount() - oldTick > 16) {
         cur = Math.floor(Globals.Curtime() * 2 % 23 + 1);
         Local.SetClanTag(AuroraNL[cur]);
         oldTick = Globals.Tickcount();
