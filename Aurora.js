@@ -3,7 +3,7 @@ var cached_fakelagState = UI.GetValue(["Rage", "Fake Lag", "General", "Enabled"]
 var cached_fakelagLimit = UI.GetValue(["Rage", "Fake Lag", "General", "Limit"]);
 var cached_fakelagJitter = UI.GetValue(["Rage", "Fake Lag", "General", "Jitter"]);
 var cached_aspectRatio = Convar.GetString("r_aspectratio");
-var cached_legmovementState = UI.GetValue(["Misc.","Movement","Leg movement"]);
+var cached_legmovementState = UI.GetValue(["Misc.", "Movement", "Leg movement"]);
 
 UI.AddSubTab(["Misc.", "SUBTAB_MGR"], "Aurora");
 UI.AddDropdown(["Misc.", "Aurora", "Aurora"], "Section", ["Anti-Aim", "Doubletap", "Fakelag", "Visuals", "Miscellaneous"], 0);
@@ -239,12 +239,12 @@ function onSlowWalk() {
 function onShakingLegs() {
     if (UI.GetValue(["Misc.", "Aurora", "Aurora", "Shaking legs"]) == 1) {
         if (Globals.Tickcount() % getMathRandom(4, 7) == 0) {
-            if (UI.GetValue(["Misc.","Movement","Leg movement"]) == 2) {
-                UI.SetValue(["Misc.","Movement","Leg movement"], 1);
-            } else if (UI.GetValue(["Misc.","Movement","Leg movement"]) == 1) {
-                UI.SetValue(["Misc.","Movement","Leg movement"], 0);
-            } else if (UI.GetValue(["Misc.","Movement","Leg movement"]) == 0) {
-                UI.SetValue(["Misc.","Movement","Leg movement"], 2);
+            if (UI.GetValue(["Misc.", "Movement", "Leg movement"]) == 2) {
+                UI.SetValue(["Misc.", "Movement", "Leg movement"], 1);
+            } else if (UI.GetValue(["Misc.", "Movement", "Leg movement"]) == 1) {
+                UI.SetValue(["Misc.", "Movement", "Leg movement"], 0);
+            } else if (UI.GetValue(["Misc.", "Movement", "Leg movement"]) == 0) {
+                UI.SetValue(["Misc.", "Movement", "Leg movement"], 2);
             }
         }
     }
@@ -684,13 +684,89 @@ function onClantag() {
     }
 }
 
+const time = Globals.Realtime();
+var currently_defusing = false;
+var currently_picking_hostage = false;
+var Aurora_aa = true;
+var key_e = false;
+
+function KratoEPeek() {
+    var defusing = Entity.GetProp(Entity.GetLocalPlayer(), "CCSPlayer", "m_bIsDefusing")
+    var picking_hostage = Entity.GetProp(Entity.GetLocalPlayer(), "CCSPlayer", "m_bIsGrabbingHostage")
+    var holding = Entity.GetWeapon(Entity.GetLocalPlayer()) == 116;
+    var planted = Entity.GetEntitiesByClassID(128);
+    var buttons = UserCMD.GetButtons();
+    var Aurora_AA_EPeek_YAW = GetMathRandom(172, 179);
+
+    restrictions = UI.GetValue(["Config", "Cheat", "General", "Restrictions"]);
+    yaw_offset = UI.GetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"]);
+    jitter_offset = UI.GetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"]);
+    pitch_mode = UI.GetValue(["Rage", "Anti Aim", "General", "Pitch mode"]);
+    at_targets = UI.GetValue(["Rage", "Anti Aim", "Directions", "At targets"]);
+
+
+    if (!planted) {
+        DefuseReset()
+    }
+    if (!currently_defusing && !picking_hostage && UI.GetValue(["Misc.", "Aurora", "Aurora", "E-Peek"]) && Input.IsKeyPressed(45)) {
+        AntiAim.SetOverride(1);
+        UI.SetValue(["Config", "Cheat", "General", "Restrictions"], 0);
+        UI.SetValue(["Rage", "Anti Aim", "General", "Pitch mode"], 0);
+        UI.SetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"], Aurora_AA_EPeek_YAW);
+        UI.SetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"], 4);
+        UI.SetValue(["Rage", "Anti Aim", "General", "Key assignment", "Jitter"], 3);
+        UI.SetValue(["Rage", "Anti Aim", "Directions", "At targets"], 0);
+        key_e = false;
+        if (Globals.Realtime() >= time + 0.2) {
+            if (key_e == false) {
+                Cheat.ExecuteCommand("+use");
+                key_e = true;
+            }
+            if (key_e == true) {
+                Cheat.ExecuteCommand("-use");
+            }
+        } else if (key_e == true) {
+            Cheat.ExecuteCommand("-use");
+            key_e = false;
+        }
+    } else if (!Aurora_aa) {
+        UI.SetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"], yaw_offset);
+        UI.SetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"], jitter_offset);
+        UI.SetValue(["Rage", "Anti Aim", "General", "Pitch mode"], pitch_mode);
+        UI.SetValue(["Rage", "Anti Aim", "Directions", "At targets"], at_targets);
+        Aurora_aa = true;
+        currently_defusing = false;
+        currently_picking_hostage = false;
+    } else {
+        UI.SetValue(["Rage", "Anti Aim", "General", "Pitch mode"], 1);
+    }
+}
+function Defusing() {
+    const userid = Entity.GetEntitiesByClassID(Event.GetFloat("userid"));
+
+    if (Entity.IsLocalPlayer(userid))
+        currently_defusing = true;
+    currently_picking_hostage = true;
+}
+
+function DefuseReset() {
+    currently_defusing = false;
+    currently_picking_hostage = false;
+}
+
+Cheat.RegisterCallback("CreateMove", "KratoEPeek");
+Cheat.RegisterCallback("bomb_begindefuse", "Defusing");
+Cheat.RegisterCallback("round_start", "DefuseReset");
+Cheat.RegisterCallback("player_connect_full", "DefuseReset");
+Cheat.RegisterCallback("bomb_abortdefuse", "DefuseReset");
+
 function onUnload() {
     Exploit.EnableRecharge();
     UI.SetValue(["Rage", "Fake Lag", "General", "Enabled"], cached_fakelagState);
     UI.SetValue(["Rage", "Fake Lag", "General", "Limit"], cached_fakelagLimit);
     UI.SetValue(["Rage", "Fake Lag", "General", "Jitter"], cached_fakelagJitter);
     UI.SetValue(["Rage", "Fake Lag", "General", "Enabled"], cached_fakelagState);
-    UI.SetValue(["Misc.","Movement","Leg movement"], cached_legmovementState);
+    UI.SetValue(["Misc.", "Movement", "Leg movement"], cached_legmovementState);
 }
 
 Cheat.RegisterCallback("Unload", "onUnload");
