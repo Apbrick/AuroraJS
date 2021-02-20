@@ -329,7 +329,6 @@ function onFakelag() {
                 UI.SetValue(["Rage", "Fake Lag", "General", "Jitter"], 2);
             }
         }
-        var setback = false;
     }
 }
 
@@ -663,7 +662,26 @@ function onAspectratio() {
 }
 
 function onClantag() {
-    //TO BE DONE
+    var oldTick = Globals.Tickcount();
+    var AuroraNL = ["/", "/\\", "A", "A|", "A|_", "A|_|", "Au", "Au|", "Au|‾", "Aur", "Aur0", "Auro", "Auro|", "Auro|‾", "Auror", "Auror/", "Auror/\\", "Aurora", "Aurora", "Auror", "Auro", "Aur", "Au", "A", ""];
+    var AuroraGS = ["A", "Au", "Aur", "Auro", "Auror", "Aurora", "Aurora", "Auror", "Auro", "Aur", "Au", "A", ""];
+    var AuroraStatic = "Aurora"
+
+    if (UI.GetValue(["Misc.", "Aurora", "Aurora", "Clantag"]) == 1 && Globals.Tickcount() - oldTick > 16) {
+        Local.SetClanTag(AuroraStatic)
+    } else if (UI.GetValue(["Misc.", "Aurora", "Aurora", "Clantag"]) == 2 && Globals.Tickcount() - oldTick > 16) {
+        cur = Math.floor(Globals.Curtime() * 2 % 12 + 1);
+        Local.SetClanTag(AuroraGS[cur]);
+        oldTick = Globals.Tickcount();
+        Globals.ChokedCommands() == 0;
+    } else if (UI.GetValue(["Misc.", "Aurora", "Aurora", "Clantag"]) == 3 && Globals.Tickcount() - oldTick > 16) {
+        cur = Math.floor(Globals.Curtime() * 2 % 23 + 1);
+        Local.SetClanTag(AuroraNL[cur]);
+        oldTick = Globals.Tickcount();
+        Globals.ChokedCommands() == 0;
+    } else if (Globals.Tickcount() - oldTick > 16) {
+        Local.SetClanTag("")
+    }
 }
 
 function onUnload() {
