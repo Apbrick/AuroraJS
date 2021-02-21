@@ -777,13 +777,7 @@ function DefuseReset() {
     currently_picking_hostage = false;
 }
 
-Cheat.RegisterCallback("CreateMove", "onEpeek");
-Cheat.RegisterCallback("bomb_begindefuse", "Defusing");
-Cheat.RegisterCallback("round_start", "DefuseReset");
-Cheat.RegisterCallback("player_connect_full", "DefuseReset");
-Cheat.RegisterCallback("bomb_abortdefuse", "DefuseReset");
-
-function onUnload() {
+function Unload() {
     Exploit.EnableRecharge();
     UI.SetValue(["Rage", "Fake Lag", "General", "Enabled"], cached_fakelagState);
     UI.SetValue(["Rage", "Fake Lag", "General", "Limit"], cached_fakelagLimit);
@@ -815,6 +809,7 @@ function Draw() {
 
 }
 
+Cheat.RegisterCallback("Unload", "Unload");
 Cheat.RegisterCallback("CreateMove", "CreateMove");
 Cheat.RegisterCallback("Draw", "Draw")
 Cheat.RegisterCallback("bomb_begindefuse", "Defusing");
