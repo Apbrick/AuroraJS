@@ -10,7 +10,7 @@ UI.AddDropdown(["Misc.", "Aurora", "Aurora"], "Section", ["Anti-Aim", "Doubletap
 
 //Anti-Aim
 UI.AddDropdown(["Misc.", "Aurora", "Aurora"], "Anti-Aim Mode", ["None", "Simple", "Advanced", "Aurora"], 0);
-UI.AddCheckbox(["Misc.", "Aurora", "Aurora"], "Legit AA on E")
+//UI.AddCheckbox(["Misc.", "Aurora", "Aurora"], "Legit AA on E")
 UI.AddCheckbox(["Misc.", "Aurora", "Aurora"], "Low delta on slowwalk");
 UI.AddCheckbox(["Misc.", "Aurora", "Aurora"], "Shaking legs");
 
