@@ -408,8 +408,8 @@ function onIndicators() {
     } else if (getDropdownValue(UI.GetValue(["Misc.", "Aurora", "Aurora", "Indicators"]), 1) && (getDropdownValue(UI.GetValue(["Misc.", "Aurora", "Aurora", "Indicators"]), 2))) {
         fly = 25
         dty = 35
-    } 
-        else if (getDropdownValue(UI.GetValue(["Misc.", "Aurora", "Aurora", "Indicators"]), 2)) {
+    }
+    else if (getDropdownValue(UI.GetValue(["Misc.", "Aurora", "Aurora", "Indicators"]), 2)) {
         fly = 25
     } else if (getDropdownValue(UI.GetValue(["Misc.", "Aurora", "Aurora", "Indicators"]), 1) && getDropdownValue(UI.GetValue(["Misc.", "Aurora", "Aurora", "Indicators"]), 2) && getDropdownValue(UI.GetValue(["Misc.", "Aurora", "Aurora", "Indicators"]), 3)) {
         aay = 25
@@ -721,11 +721,11 @@ function onEpeek() {
     var buttons = UserCMD.GetButtons();
     var Aurora_AA_EPeek_YAW = GetMathRandom(172, 179);
 
-    var restrictions = UI.GetValue(["Config", "Cheat", "General", "Restrictions"]);
-    var yaw_offset = UI.GetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"]);
-    var jitter_offset = UI.GetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"]);
-    var pitch_mode = UI.GetValue(["Rage", "Anti Aim", "General", "Pitch mode"]);
-    var at_targets = UI.GetValue(["Rage", "Anti Aim", "Directions", "At targets"]);
+    restrictions = UI.GetValue(["Config", "Cheat", "General", "Restrictions"]);
+    yaw_offset = UI.GetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"]);
+    jitter_offset = UI.GetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"]);
+    pitch_mode = UI.GetValue(["Rage", "Anti Aim", "General", "Pitch mode"]);
+    at_targets = UI.GetValue(["Rage", "Anti Aim", "Directions", "At targets"]);
 
 
     if (!planted) {
@@ -789,24 +789,24 @@ function Unload() {
 
 function CreateMove() {
     onEpeek(),
-    aaNone(),
-    aaSimple(),
-    aaAurora(),
-    aaAdvanced(),
-    onSlowWalk(),
-    onShakingLegs(),
-    onDoubletap(),
-    dtRecharge(),
-    onFakelag(),
-    onClantag()
+        aaNone(),
+        aaSimple(),
+        aaAurora(),
+        aaAdvanced(),
+        onSlowWalk(),
+        onShakingLegs(),
+        onDoubletap(),
+        dtRecharge(),
+        onFakelag(),
+        onClantag()
 }
 
 function Draw() {
     onSectionSelection(),
-    onIndicators(),
-    onWatermark(),
-    onHotkeylist(),
-    onAspectratio()
+        onIndicators(),
+        onWatermark(),
+        onHotkeylist(),
+        onAspectratio()
 
 }
 
