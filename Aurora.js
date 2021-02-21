@@ -792,6 +792,37 @@ function onUnload() {
     UI.SetValue(["Misc.", "Movement", "Leg movement"], cached_legmovementState);
 }
 
+function CreateMove() {
+    onEpeek(),
+    aaNone(),
+    aaSimple(),
+    aaAurora(),
+    aaAdvanced(),
+    onSlowWalk(),
+    onShakingLegs(),
+    onDoubletap(),
+    dtRecharge(),
+    onFakelag(),
+    onClantag()
+}
+
+function Draw() {
+    onSectionSelection(),
+    onIndicators(),
+    onWatermark(),
+    onHotkeylist(),
+    onAspectratio()
+
+}
+
+Cheat.RegisterCallback("CreateMove", "CreateMove");
+Cheat.RegisterCallback("Draw", "Draw")
+Cheat.RegisterCallback("bomb_begindefuse", "Defusing");
+Cheat.RegisterCallback("round_start", "DefuseReset");
+Cheat.RegisterCallback("player_connect_full", "DefuseReset");
+Cheat.RegisterCallback("bomb_abortdefuse", "DefuseReset");
+
+/*
 Cheat.RegisterCallback("Unload", "onUnload");
 Cheat.RegisterCallback("Draw", "onSectionSelection");
 
@@ -818,3 +849,4 @@ Cheat.RegisterCallback("Draw", "onAspectratio");
 
 //Miscellaneous
 Cheat.RegisterCallback("CreateMove", "onClantag");
+*/
