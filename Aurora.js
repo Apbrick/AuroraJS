@@ -721,11 +721,11 @@ function onEpeek() {
     var buttons = UserCMD.GetButtons();
     var Aurora_AA_EPeek_YAW = GetMathRandom(172, 179);
 
-    restrictions = UI.GetValue(["Config", "Cheat", "General", "Restrictions"]);
-    yaw_offset = UI.GetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"]);
-    jitter_offset = UI.GetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"]);
-    pitch_mode = UI.GetValue(["Rage", "Anti Aim", "General", "Pitch mode"]);
-    at_targets = UI.GetValue(["Rage", "Anti Aim", "Directions", "At targets"]);
+    var restrictions = UI.GetValue(["Config", "Cheat", "General", "Restrictions"]);
+    var yaw_offset = UI.GetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"]);
+    var jitter_offset = UI.GetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"]);
+    var pitch_mode = UI.GetValue(["Rage", "Anti Aim", "General", "Pitch mode"]);
+    var at_targets = UI.GetValue(["Rage", "Anti Aim", "Directions", "At targets"]);
 
 
     if (!planted) {
@@ -757,6 +757,7 @@ function onEpeek() {
         UI.SetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"], jitter_offset);
         UI.SetValue(["Rage", "Anti Aim", "General", "Pitch mode"], pitch_mode);
         UI.SetValue(["Rage", "Anti Aim", "Directions", "At targets"], at_targets);
+        UI.SetValue(["Config", "Cheat", "General", "Restrictions"], restrictions);
         Aurora_aa = true;
         currently_defusing = false;
         currently_picking_hostage = false;
