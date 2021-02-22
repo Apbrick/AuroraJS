@@ -448,7 +448,7 @@ menu.render = function () {
                 case 0:
                     menu.groupbox(menu.x + 110, menu.y + 35, 285, 260, "groupbox 3", false); {
                         menu.button("Join Server", join_server.click);
-                        menu.combobox("Clantag", ["Off", "Static", "Simple", "Fancy"], "clantag");
+                        menu.combobox("Clantag", ["Off", "Static", "Fancy"], "clantag");
                         menu.checkbox("Hide Chat", "hide_chat")
                         menu.hotkey("Menu hotkey", "menu_hotkey");
                         menu.color_picker("Menu color", "menu_color", false)
@@ -1443,12 +1443,12 @@ function lowdeltav2() {
     ab_jitter_offset = UI.GetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"]);
     ab_pitch_mode = UI.GetValue(["Rage", "Anti Aim", "General", "Pitch mode"]);
     ab_at_targets = UI.GetValue(["Rage", "Anti Aim", "Directions", "At targets"]);
-    if (config.low_delta_slowwalk.value && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "Slow walk"]) && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "AA Direction inverter"], "AA Inverter")) {
+    if (config.low_delta_slowwalk.value && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "Slow walk"]) && !UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "AA Direction inverter"], "AA Inverter")) {
         AntiAim.SetOverride(1);
         UI.SetValue(["Rage", "Anti Aim", "Directions", "At targets"], 1);
         AntiAim.SetFakeOffset(GetMathRandom(45, 55));
         AntiAim.SetRealOffset(-10);
-    } else if (config.low_delta_slowwalk.value && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "Slow walk"]) && !UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "AA Direction inverter"], "AA Inverter")) {
+    } else if (config.low_delta_slowwalk.value && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "Slow walk"]) && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "AA Direction inverter"], "AA Inverter")) {
         AntiAim.SetOverride(1);
         UI.SetValue(["Rage", "Anti Aim", "Directions", "At targets"], 1);
         AntiAim.SetFakeOffset(GetMathRandom(-45, -55));
@@ -1604,20 +1604,24 @@ Cheat.RegisterCallback("CreateMove", "FastRecharge");
 
 var client_set_clan_tag = Local.SetClanTag;
 var oldTick = Globals.Tickcount();
-var AuroraNL = ["/", "/\\", "A", "A|", "A|_", "A|_|", "Au", "Au|", "Au|‾", "Aur", "Aur0", "Auro", "Auro|", "Auro|‾", "Auror", "Auror/", "Auror/\\", "Aurora", "Aurora", "Auror", "Auro", "Aur", "Au", "A", ""];
+var AuroraNL = ["/", "/\\", "A", "A|", "A|_", "A|_|", "Au", "Au|", "Au|‾", "Aur", "Aur0", "Auro", "Auro|", "Auro|‾", "Auror", "Auror/", "Auror/\\", "Aurora", "Aurora", "Auror", "Auro", "Aur", "Au", "A", "", "", ""];
 var AuroraGS = ["A", "Au", "Aur", "Auro", "Auror", "Aurora", "Aurora", "Auror", "Auro", "Aur", "Au", "A", ""];
 var AuroraStatic = "Aurora"
+const globaltime = Globals.Realtime();
+const delay = 0.1;
 
 function AuroraClantag() {
     if (config.clantag.value & (3 << 1)) {
-        if (Globals.Tickcount() - oldTick > 18) {
-            cur = Math.floor(Globals.Curtime() * 2 % 23 + 1);
+        if (Globals.Realtime() > globaltime + delay) {
+            globaltime = Globals.Realtime();
+            cur = Math.floor(Globals.Curtime() * 2 % 25 + 1);
             Local.SetClanTag(AuroraNL[cur]);
             oldTick = Globals.Tickcount();
             Globals.ChokedCommands() == 0;
         }
-    } else if (config.clantag.value & (1 << 3)) {
-        if (Globals.Tickcount() - oldTick > 16) {
+    } else if (config.clantag.value & (1 << 0)) {
+        if (Globals.Realtime() > globaltime + delay) {
+            globaltime = Globals.Realtime();
             Local.SetClanTag(AuroraStatic)
         }
     }
@@ -2058,7 +2062,7 @@ function render_effect() {
         const inc_size = ((1 / config.healthshot_effect_strongness.value) * Global.Frametime()) * 360
 
         alpha = clamp(alpha - inc_alpha, 0, 255);
-        size = clamp(size - inc_size, 0, 360); 
+        size = clamp(size - inc_size, 0, 360);
 
         const x = Global.GetScreenSize()[0], y = Global.GetScreenSize()[1];
         const hscolor = menu.get_color(config.healthshot_color)
@@ -2089,7 +2093,7 @@ Global.RegisterCallback("Draw", "render_effect");
 function asciiart() {
     var randomnumber = GetMathRandom(1, 7)
 
-    
+
 }
 Cheat.Print("      _____                                     \n")
 Cheat.Print("     /  _  \\  __ _________  ________________    \n")
