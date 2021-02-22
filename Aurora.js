@@ -1460,12 +1460,12 @@ function lowdeltav2() {
     ab_jitter_offset = UI.GetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"]);
     ab_pitch_mode = UI.GetValue(["Rage", "Anti Aim", "General", "Pitch mode"]);
     ab_at_targets = UI.GetValue(["Rage", "Anti Aim", "Directions", "At targets"]);
-    if (config.low_delta_slowwalk.value && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "Slow walk"]) && !UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "AA Direction inverter"], "AA Inverter")) {
+    if (config.low_delta_slowwalk.value && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "Slow walk"]) && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "AA Direction inverter"], "AA Inverter")) {
         AntiAim.SetOverride(1);
         UI.SetValue(["Rage", "Anti Aim", "Directions", "At targets"], 1);
         AntiAim.SetFakeOffset(GetMathRandom(45, 55));
         AntiAim.SetRealOffset(-10);
-    } else if (config.low_delta_slowwalk.value && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "Slow walk"]) && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "AA Direction inverter"], "AA Inverter")) {
+    } else if (config.low_delta_slowwalk.value && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "Slow walk"]) && !UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "AA Direction inverter"], "AA Inverter")) {
         AntiAim.SetOverride(1);
         UI.SetValue(["Rage", "Anti Aim", "Directions", "At targets"], 1);
         AntiAim.SetFakeOffset(GetMathRandom(-45, -55));
