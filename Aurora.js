@@ -5,9 +5,12 @@
 
 //UPDATES:
 //Added GUI
+//Removed Simple Clantag
+//Fixed Static + Fancy Clantags
 //Removed Indicators
-//Fixed Fancy Clantag
-//Reworked Low delta
+//Reworked Slow walk AA
+//Added Kill effect
+//Hotkey list can now be dragged while only GUI is open
 
 
 debugbuild = Cheat.GetUsername() == "Apnix" || Cheat.GetUsername() == "geinibba3413";
@@ -138,7 +141,9 @@ const config = {
     clantag: dropdown_t(),
     hide_chat: checkbox_t(),
     menu_color: color_picker_t(213, 78, 92, 255),
-    menu_hotkey: hotkey_t(0x24, hotkey_mode_t.TOGGLE, true) // 0 = Hold, 1 = Toggle, 2 = Always on
+    menu_hotkey: hotkey_t(0x24, hotkey_mode_t.TOGGLE, true),
+    hotkey_x: slider_t(),
+    hotkey_y: slider_t(),
 };
 const join_server = {};
 
@@ -429,7 +434,7 @@ menu.render = function () {
                             }
                         }
                         aspslider();
-                        menu.checkbox("Healhtshot Effect", "healthshot_effect")
+                        menu.checkbox("Kill Effect", "healthshot_effect")
                         function healthslider() {
                             if (config.healthshot_effect.value) {
                                 menu.slider("   Strenght", "healthshot_effect_strongness", 0, 4, 0.1, true)
@@ -455,6 +460,18 @@ menu.render = function () {
                         menu.button("Save config", config_system.save);
                         menu.button("Load config", config_system.load);
                     }
+                    break;
+            }
+            break;
+        case 7:
+            // switch between subtabs in the second tab
+            switch (menu.curr_subtab["tab 6"]) {
+                // first subtab
+                case 0:
+                    menu.slider("_draggable_" + this.draggables.length + "_x", "hotkey_x", 0, screenSize[0], 1, false)
+                    menu.slider("_draggable_" + this.draggables.length + "_y", "hotkey_y", 0, screenSize[1], 1, false)
+
+                    menu.button("Join Server", join_server.click);
                     break;
             }
             break;
@@ -1658,13 +1675,11 @@ const draggable = {
     create_draggable: function (startingSizeX, startingSizeY, callback) {
         const screenSize = Render.GetScreenSize();
 
-        const sliderX = UI.AddSliderInt(["Rage", "Anti Aim", "General"], "_draggable_" + this.draggables.length + "_x", 0, screenSize[0]);
-        const sliderY = UI.AddSliderInt(["Rage", "Anti Aim", "General"], "_draggable_" + this.draggables.length + "_y", 0, screenSize[1]);
-        UI.SetEnabled(sliderX, 0);
-        UI.SetEnabled(sliderY, 0);
+        const sliderX = config.hotkey_x.value;
+        const sliderY = config.hotkey_y.value;
 
         this.draggables.push({
-            pos: [UI.GetValue(sliderX), UI.GetValue(sliderY)],
+            pos: [config.hotkey_x.value, config.hotkey_y.value],
             size: [startingSizeX, startingSizeY],
 
             isDragging: false,
@@ -1676,7 +1691,7 @@ const draggable = {
 
             update: function () {
                 const screenSize = Render.GetScreenSize();
-                const menuOpened = UI.IsMenuOpen();
+                const menuOpened = menu.opened;
 
                 if (menuOpened) {
                     if (Input.IsKeyPressed(1)) {
