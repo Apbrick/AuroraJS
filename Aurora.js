@@ -446,7 +446,6 @@ menu.render = function () {
                 case 0:
                     menu.groupbox(menu.x + 110, menu.y + 35, 285, 260, "groupbox 3", false); {
                         menu.button("Join Server", join_server.click);
-                        menu.checkbox("Clantag Changer", "clan_tag")
                         menu.combobox("Clantag", ["Off", "Static", "Simple", "Fancy"], "clantag");
                         menu.checkbox("Hide Chat", "hide_chat")
                         menu.hotkey("Menu hotkey", "menu_hotkey");
