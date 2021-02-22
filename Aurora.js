@@ -10,7 +10,7 @@ UI.AddDropdown(["Misc.", "Aurora", "Aurora"], "Section", ["Anti-Aim", "Doubletap
 
 //Anti-Aim
 UI.AddDropdown(["Misc.", "Aurora", "Aurora"], "Anti-Aim Mode", ["None", "Simple", "Advanced", "Aurora"], 0);
-//UI.AddCheckbox(["Misc.", "Aurora", "Aurora"], "Legit AA on E")
+UI.AddCheckbox(["Misc.", "Aurora", "Aurora"], "Legit AA on E")
 UI.AddCheckbox(["Misc.", "Aurora", "Aurora"], "Low delta on slowwalk");
 UI.AddCheckbox(["Misc.", "Aurora", "Aurora"], "Shaking legs");
 
@@ -731,7 +731,7 @@ function onEpeek() {
     if (!planted) {
         DefuseReset()
     }
-    if (!currently_defusing && !picking_hostage && UI.GetValue(["Misc.", "Aurora", "Aurora", "Legit AA on E"]) && Input.IsKeyPressed(45)) {
+    if (!currently_defusing && !picking_hostage && UI.GetValue(["Misc.", "Aurora", "Aurora", "Legit AA on E"]) && Input.IsKeyPressed(0x45)) {
         AntiAim.SetOverride(1);
         UI.SetValue(["Config", "Cheat", "General", "Restrictions"], 0);
         UI.SetValue(["Rage", "Anti Aim", "General", "Pitch mode"], 0);
