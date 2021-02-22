@@ -134,6 +134,7 @@ const config = {
     aspect_ratio_slider: slider_t(),
     healthshot_effect: checkbox_t(),
     healthshot_effect_strongness: slider_t(),
+    healthshot_color: color_picker_t(255, 255, 255, 255),
     clantag: dropdown_t(),
     hide_chat: checkbox_t(),
     menu_color: color_picker_t(213, 78, 92, 255),
@@ -432,6 +433,7 @@ menu.render = function () {
                         function healthslider() {
                             if (config.healthshot_effect.value) {
                                 menu.slider("   Strenght", "healthshot_effect_strongness", 0, 4, 0.1, true)
+                                menu.color_picker("   Color", "healthshot_color", false)
                             }
                         }
                         healthslider();
@@ -2042,8 +2044,6 @@ Cheat.RegisterCallback("CreateMove", "hidechat")
 var alpha = 0;
 var size = 0;
 
-const time = config.healthshot_effect_strongness.value;
-
 function clamp(v, min, max) {
     return Math.max(Math.min(v, max), min);
 }
@@ -2058,14 +2058,15 @@ function render_effect() {
         const inc_size = ((1 / config.healthshot_effect_strongness.value) * Global.Frametime()) * 360
 
         alpha = clamp(alpha - inc_alpha, 0, 255);
-        size = clamp(size - inc_size, 0, 360);
+        size = clamp(size - inc_size, 0, 360); 
 
         const x = Global.GetScreenSize()[0], y = Global.GetScreenSize()[1];
+        const hscolor = menu.get_color(config.healthshot_color)
 
-        Render.GradientRect(0, 0, x, size, 0, [128, 195, 255, alpha], [128, 195, 255, 0]);
-        Render.GradientRect(0, y - size, x, size, 0, [128, 195, 255, 0], [128, 195, 255, alpha]);
-        Render.GradientRect(x - size, 0, size, y, 1, [128, 195, 255, 0], [128, 195, 255, alpha]);
-        Render.GradientRect(0, 0, size, y, 1, [128, 195, 255, alpha], [128, 195, 255, 0]);
+        Render.GradientRect(0, 0, x, size, 0, [hscolor[0], hscolor[1], hscolor[2], alpha], [hscolor[0], hscolor[1], hscolor[2], 0]);
+        Render.GradientRect(0, y - size, x, size, 0, [hscolor[0], hscolor[1], hscolor[2], 0], [hscolor[0], hscolor[1], hscolor[2], alpha]);
+        Render.GradientRect(x - size, 0, size, y, 1, [hscolor[0], hscolor[1], hscolor[2], 0], [hscolor[0], hscolor[1], hscolor[2], alpha]);
+        Render.GradientRect(0, 0, size, y, 1, [hscolor[0], hscolor[1], hscolor[2], alpha], [hscolor[0], hscolor[1], hscolor[2], 0]);
     }
 }
 
