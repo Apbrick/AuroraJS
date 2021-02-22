@@ -430,7 +430,7 @@ menu.render = function () {
                         menu.checkbox("Aspect Ratio", "aspect_ratio")
                         function aspslider() {
                             if (config.aspect_ratio.value) {
-                                menu.slider("Aspect Ratio Value", "aspect_ratio_slider", 0, 4, 0.05, true)
+                                menu.slider("   Value", "aspect_ratio_slider", 0, 4, 0.05, true)
                             }
                         }
                         aspslider();
@@ -1519,27 +1519,27 @@ Cheat.RegisterCallback("Draw", "LegBreaker");
 
 // Advanced fakelag fully done
 function AuroraFakelag() {
-    var fakelagmin = config.fake_lag_min.value
-    var customfakelag = GetMathRandom(config.fake_lag_min.value, config.fake_lag_max.value);
-    if (config.advanced_fakelag.value & (1 << 1)) {
+    if (config.advanced_fakelag.value & (1 << 0)) {
         UI.SetValue(["Rage", "Fake Lag", "General", "Enabled"], 1);
         UI.SetValue(["Rage", "Fake Lag", "General", "Limit"], (GetMathRandom(9, 12)));
         UI.SetValue(["Rage", "Fake Lag", "General", "Jitter"], (GetMathRandom(2, 8)));
-    } else if (config.advanced_fakelag.value & (1 << 2)) {
+        UI.SetValue(["Rage", "Fake Lag", "General", "Trigger limit"], (GetMathRandom(12, 14)));
+    } else if (config.advanced_fakelag.value & (2 << 0)) {
         UI.SetValue(["Rage", "Fake Lag", "General", "Enabled"], 1);
-        UI.SetValue(["Rage", "Fake Lag", "General", "Limit"], customfakelag);
-        UI.SetValue(["Rage", "Fake Lag", "General", "Jitter"], 2);
+        UI.SetValue(["Rage", "Fake Lag", "General", "Limit"], Globals.Tickcount() % 2 ? 1.4 : 13);
+        UI.SetValue(["Rage", "Fake Lag", "General", "Jitter"], (Globals.Tickcount() % 20 ? 14 : 13) + 12);
+        UI.SetValue(["Rage", "Fake Lag", "General", "Trigger limit"], Globals.Tickcount() % 2 ? 1.2 : 14);
     } else if (config.advanced_fakelag.value & (1 << 0)) {
         UI.SetValue(["Rage", "Fake Lag", "General", "Enabled"], 1);
     }
 };
 
 function KrFLDisable() {
-    if (config.leg_breaker.value & (1 << 1) && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "Fake duck"])) {
+    if (config.leg_breaker.value & (1 << 0) && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "Fake duck"])) {
         UI.SetValue(["Rage", "Fake Lag", "General", "Enabled"], 1);
         UI.SetValue(["Rage", "Fake Lag", "General", "Limit"], 13);
         UI.SetValue(["Rage", "Fake Lag", "General", "Jitter"], 2);
-    } else if (config.leg_breaker.value & (1 << 2) && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "Fake duck"])) {
+    } else if (config.leg_breaker.value & (2 << 0) && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "Fake duck"])) {
         UI.SetValue(["Rage", "Fake Lag", "General", "Enabled"], 1);
         UI.SetValue(["Rage", "Fake Lag", "General", "Limit"], 13);
         UI.SetValue(["Rage", "Fake Lag", "General", "Jitter"], 2);
