@@ -1,9 +1,4 @@
-//===================================================
-//          Before you update make sure to check for:
-//          Render.String( menu.x + 120, menu.y + 84, 0, "Current version: ", [ 255, 255, 255, 205 ], menu.font )
-//===================================================
-
-//UPDATES:
+//UPDATES for V1.1:
 //Added GUI
 //Removed Simple Clantag
 //Fixed Static + Fancy Clantags
@@ -15,11 +10,8 @@
 //Added custom slow walk speed
 //Added Load config button on main startup screen
 
-
-debugbuild = Cheat.GetUsername() == "Apnix" || Cheat.GetUsername() == "geinibba3413";
+debugbuild = Cheat.GetUsername() == "Apbrick" || Cheat.GetUsername() == "geinibba3413" || Cheat.GetUsername() == "Heneston";
 betabuild = Cheat.GetUsername() == "Brexan" || Cheat.GetUsername() == "avatar" || Cheat.GetUsername() == "Zapzter" || Cheat.GetUsername() == "xyren";
-
-
 
 //=======================================================================================================
 //
@@ -1249,11 +1241,11 @@ Cheat.RegisterCallback("CreateMove", "on_cmove")
 
 
 //=======================================================================================================
-
-
+//
+//
 // GUI ENDS HERE
-
-
+//
+// 
 //=======================================================================================================
 
 function GetMathRandom(min, max) {
@@ -1280,7 +1272,6 @@ function AuroraSimple() {
         AntiAim.SetOverride(1);
         AntiAim.SetRealOffset(42);
         AntiAim.SetFakeOffset(GetMathRandom(25, 32));
-
     }
 }
 Cheat.RegisterCallback("CreateMove", "AuroraSimple");
@@ -1394,7 +1385,7 @@ function on_prestart() {
 }
 
 // E Peek
-//Thanks Atti + Zapzter for the help with Defusing and Planting
+
 const time = Globals.Realtime();
 var currently_defusing = false;
 var Aurora_aa = true;
@@ -1861,7 +1852,6 @@ Cheat.RegisterCallback("Draw", "AuroraHotkey");
 
 
 //Watermark --  Finished
-//Zap came in clutch again
 
 function WatermarkText() {
     var getserverstring = World.GetServerString();
@@ -1924,7 +1914,7 @@ Cheat.RegisterCallback("Draw", "watermark");
 
 
 
-// Indicators
+// Indicators (currently disabled)
 function aatext() {
     if (config.aa_modes.value & (1 << 0)) {
         return "None"
@@ -2128,14 +2118,75 @@ Cheat.RegisterCallback("Draw", "render_effect");
 
 // Upon startup shows Aurora ASCII art
 
-function asciiart() {
-    var randomnumber = GetMathRandom(1, 7)
-
-
+function Onstartup() {
+    var Variation = GetMathRandom(1, 7);
+        if (Variation == 1) {
+            Cheat.Print("      _____                                     \n")
+            Cheat.Print("     /  _  \\  __ _________  ________________    \n")
+            Cheat.Print("    /  /_\\  \\|  |  \\_  __ \\/  _ \\_  __ \\__  \\  \n")
+            Cheat.Print("   /    |    \\  |  /|  | \\(  <_> )  | \\// __ \\_ \n")
+            Cheat.Print("   \\____|__  /____/ |__|   \\____/|__|  (____  / \n")
+            Cheat.Print("           \\/                               \\/  \n")
+        } else if (Variation == 2) {
+            Cheat.Print("  /$$$$$$                                                   \n")
+            Cheat.Print(" /$$__  $$                                                  \n")
+            Cheat.Print("| $$  \\ $$ /$$   /$$  /$$$$$$   /$$$$$$   /$$$$$$   /$$$$$$ \n")
+            Cheat.Print("| $$$$$$$$| $$  | $$ /$$__  $$ /$$__  $$ /$$__  $$ |____  $$\n")
+            Cheat.Print("| $$__  $$| $$  | $$| $$  \\__/| $$  \\ $$| $$  \\__/  /$$$$$$$\n")
+            Cheat.Print("| $$  | $$| $$  | $$| $$      | $$  | $$| $$       /$$__  $$\n")
+            Cheat.Print("| $$  | $$|  $$$$$$/| $$      |  $$$$$$/| $$      |  $$$$$$$\n")
+            Cheat.Print("|__/  |__/ \\______/ |__/       \\______/ |__/       \\_______/\n")
+        } else if (Variation == 3) {
+            Cheat.Print("      _/_/                                                                      \n")
+            Cheat.Print("   _/    _/     _/    _/      _/  _/_/       _/_/       _/  _/_/       _/_/_/   \n")
+            Cheat.Print("  _/_/_/_/     _/    _/      _/_/         _/    _/     _/_/         _/    _/    \n")
+            Cheat.Print(" _/    _/     _/    _/      _/           _/    _/     _/           _/    _/     \n")
+            Cheat.Print("_/    _/       _/_/_/      _/             _/_/       _/             _/_/_/      \n")
+        } else if (Variation == 4) {
+            Cheat.Print(" ______     __  __     ______     ______     ______     ______    \n")
+            Cheat.Print("/\\  __ \\   /\\ \\/\\ \\   /\\  == \\   /\\  __ \\   /\\  == \\   /\\  __ \\   \n")
+            Cheat.Print("\\ \\  __ \\  \\ \\ \\_\\ \\  \\ \\  __<   \\ \\ \\/\\ \\  \\ \\  __<   \\ \\  __ \\  \n")
+            Cheat.Print(" \\ \\_\\ \\_\\  \\ \\_____\\  \\ \\_\\ \\_\\  \\ \\_____\\  \\ \\_\\ \\_\\  \\ \\_\\ \\_\\ \n")
+            Cheat.Print("  \\/_/\\/_/   \\/_____/   \\/_/ /_/   \\/_____/   \\/_/ /_/   \\/_/\\/_/ \n")
+        } else if (Variation == 5) {
+            Cheat.Print("    ___                                        \n")
+            Cheat.Print("   /   |  __  __   _____  ____    _____  ____ _\n")
+            Cheat.Print("  / /| | / / / /  / ___/ / __ \\  / ___/ / __ `/\n")
+            Cheat.Print(" / ___ |/ /_/ /  / /    / /_/ / / /    / /_/ / \n")
+            Cheat.Print("/_/  |_|\\__,_/  /_/     \\____/ /_/     \\__,_/  \n")
+        } else if (Variation == 6) {
+            Cheat.Print("               AAA                                                                                                      \n")
+            Cheat.Print("              A:::A                                                                                                     \n")
+            Cheat.Print("             A:::::A                                                                                                    \n")
+            Cheat.Print("            A:::::::A                                                                                                   \n")
+            Cheat.Print("           A:::::::::A        uuuuuu    uuuuuu rrrrr   rrrrrrrrr      ooooooooooo   rrrrr   rrrrrrrrr   aaaaaaaaaaaaa   \n")
+            Cheat.Print("          A:::::A:::::A       u::::u    u::::u r::::rrr:::::::::r   oo:::::::::::oo r::::rrr:::::::::r  a::::::::::::a  \n")
+            Cheat.Print("         A:::::A A:::::A      u::::u    u::::u r:::::::::::::::::r o:::::::::::::::or:::::::::::::::::r aaaaaaaaa:::::a \n")
+            Cheat.Print("        A:::::A   A:::::A     u::::u    u::::u rr::::::rrrrr::::::ro:::::ooooo:::::orr::::::rrrrr::::::r         a::::a \n")
+            Cheat.Print("       A:::::A     A:::::A    u::::u    u::::u  r:::::r     r:::::ro::::o     o::::o r:::::r     r:::::r  aaaaaaa:::::a \n")
+            Cheat.Print("      A:::::AAAAAAAAA:::::A   u::::u    u::::u  r:::::r     rrrrrrro::::o     o::::o r:::::r     rrrrrrraa::::::::::::a \n")
+            Cheat.Print("     A:::::::::::::::::::::A  u::::u    u::::u  r:::::r            o::::o     o::::o r:::::r           a::::aaaa::::::a \n")
+            Cheat.Print("    A:::::AAAAAAAAAAAAA:::::A u:::::uuuu:::::u  r:::::r            o::::o     o::::o r:::::r          a::::a    a:::::a \n")
+            Cheat.Print("   A:::::A             A:::::Au:::::::::::::::uur:::::r            o:::::ooooo:::::o r:::::r          a::::a    a:::::a \n")
+            Cheat.Print("  A:::::A               A:::::Au:::::::::::::::ur:::::r            o:::::::::::::::o r:::::r          a:::::aaaa::::::a \n")
+            Cheat.Print(" A:::::A                 A:::::Auu::::::::uu:::ur:::::r             oo:::::::::::oo  r:::::r           a::::::::::aa:::a\n")
+            Cheat.Print("AAAAAAA                   AAAAAAA uuuuuuuu  uuuurrrrrrr               ooooooooooo    rrrrrrr            aaaaaaaaaa  aaaa\n")
+        } else if (Variation == 7) {
+            Cheat.Print("     _                             \n")
+            Cheat.Print("    / \\  _   _ _ __ ___  _ __ __ _ \n")
+            Cheat.Print("   / _ \\| | | | '__/ _ \\| '__/ _` |\n")
+            Cheat.Print("  / ___ \\ |_| | | | (_) | | | (_| |\n")
+            Cheat.Print(" /_/   \\_\\__,_|_|  \\___/|_|  \\__,_|\n")
+        } else {
+            Cheat.Print("      _____                                     \n")
+            Cheat.Print("     /  _  \\  __ _________  ________________    \n")
+            Cheat.Print("    /  /_\\  \\|  |  \\_  __ \\/  _ \\_  __ \\__  \\  \n")
+            Cheat.Print("   /    |    \\  |  /|  | \\(  <_> )  | \\// __ \\_ \n")
+            Cheat.Print("   \\____|__  /____/ |__|   \\____/|__|  (____  / \n")
+            Cheat.Print("           \\/                               \\/  \n")
+        }
 }
-Cheat.Print("      _____                                     \n")
-Cheat.Print("     /  _  \\  __ _________  ________________    \n")
-Cheat.Print("    /  /_\\  \\|  |  \\_  __ \\/  _ \\_  __ \\__  \\  \n")
-Cheat.Print("   /    |    \\  |  /|  | \\(  <_> )  | \\// __ \\_ \n")
-Cheat.Print("   \\____|__  /____/ |__|   \\____/|__|  (____  / \n")
-Cheat.Print("           \\/                               \\/  \n")
+Onstartup();
+
+// END AROOOOORA
+//Souljah look good or no?
