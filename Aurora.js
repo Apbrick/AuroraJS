@@ -11,6 +11,9 @@
 //Reworked Slow walk AA
 //Added Kill effect
 //Hotkey list can now be dragged while only GUI is open
+//Added Disable VC button
+//Added custom slow walk speed
+//Added Load config button on main startup screen
 
 
 debugbuild = Cheat.GetUsername() == "Apnix" || Cheat.GetUsername() == "geinibba3413";
@@ -125,6 +128,7 @@ const config = {
     aa_modes: dropdown_t(),
     e_peek: hotkey_t(0x0, hotkey_mode_t.HOLD, true),
     low_delta_slowwalk: checkbox_t(),
+    slowwalkspeed: slider_t(),
     leg_breaker: checkbox_t(),
     Aurora_doubletap: dropdown_t(),
     fast_recharge: checkbox_t(),
@@ -140,6 +144,7 @@ const config = {
     healthshot_color: color_picker_t(255, 255, 255, 255),
     clantag: dropdown_t(),
     hide_chat: checkbox_t(),
+    hide_vc: checkbox_t(),
     menu_color: color_picker_t(213, 78, 92, 255),
     menu_hotkey: hotkey_t(0x24, hotkey_mode_t.TOGGLE, true),
     hotkey_x: slider_t(),
@@ -358,10 +363,11 @@ menu.render = function () {
                 // first subtab
                 case 0:
                     menu.groupbox(menu.x + 110, menu.y + 35, 285, 260, "groupbox 3", false); {
-                        Render.String(menu.x + 120, menu.y + 45, 0, "Welcome to Aurora " + Cheat.GetUsername(), [255, 255, 255, 205], menu.font)
-                        Render.String(menu.x + 120, menu.y + 58, 0, "Join our discord for support", [255, 255, 255, 205], menu.font)
-                        Render.String(menu.x + 120, menu.y + 71, 0, "discord.buyaurora.today", [255, 255, 255, 205], menu.font)
-                        Render.String(menu.x + 120, menu.y + 84, 0, "Current version: V 1.1", [255, 255, 255, 205], menu.font)
+                        Render.String(menu.x + 120, menu.y + 65, 0, "Welcome to Aurora " + Cheat.GetUsername(), [255, 255, 255, 205], menu.font)
+                        Render.String(menu.x + 120, menu.y + 78, 0, "Join our discord for support", [255, 255, 255, 205], menu.font)
+                        Render.String(menu.x + 120, menu.y + 91, 0, "discord.buyaurora.today", [255, 255, 255, 205], menu.font)
+                        Render.String(menu.x + 120, menu.y + 104, 0, "Current version: V 1.1", [255, 255, 255, 205], menu.font)
+                        menu.button("Load config", config_system.load);
                     }
                     break;
             }
@@ -391,7 +397,13 @@ menu.render = function () {
                 case 0:
                     menu.groupbox(menu.x + 110, menu.y + 35, 285, 260, "groupbox 3", false); {
                         menu.checkbox("Slowwalk AA", "low_delta_slowwalk");
-                        menu.checkbox("Leg Breaker", "leg_breaker");
+                        function slowwalkspeed() {
+                            if (config.low_delta_slowwalk.value) {
+                                menu.slider("   Speed", "slowwalkspeed", 0, 80, 1, false)
+                            }
+                        }
+                        slowwalkspeed();
+                        menu.checkbox("Anti Prediction", "leg_breaker");
                     }
                     break;
             }
@@ -455,6 +467,12 @@ menu.render = function () {
                         menu.button("Join Server", join_server.click);
                         menu.combobox("Clantag", ["Off", "Static", "Fancy"], "clantag");
                         menu.checkbox("Hide Chat", "hide_chat")
+                        function hidevoice() {
+                            if (config.hide_chat.value) {
+                                menu.checkbox("Disable Voice Chat", "hide_vc")
+                            }
+                        }
+                        hidevoice();
                         menu.hotkey("Menu hotkey", "menu_hotkey");
                         menu.color_picker("Menu color", "menu_color", false)
                         menu.button("Save config", config_system.save);
@@ -1303,6 +1321,7 @@ function AuroraMode() {
 Cheat.RegisterCallback("CreateMove", "AuroraMode");
 
 //Anti-Brute mode
+
 //timer
 var reset_time = 0;
 var timer_indicator = 0;
@@ -1376,13 +1395,10 @@ function on_prestart() {
 
 // E Peek
 //Thanks Atti + Zapzter for the help with Defusing and Planting
-
 const time = Globals.Realtime();
 var currently_defusing = false;
-var currently_picking_hostage = false;
 var Aurora_aa = true;
 var key_e = false;
-
 function KratoEPeek() {
     var defusing = Entity.GetProp(Entity.GetLocalPlayer(), "CCSPlayer", "m_bIsDefusing")
     var picking_hostage = Entity.GetProp(Entity.GetLocalPlayer(), "CCSPlayer", "m_bIsGrabbingHostage")
@@ -1435,7 +1451,7 @@ function KratoEPeek() {
     }
 }
 function Defusing() {
-    const userid = Entity.GetEntitiesByClassID(event_get_int("userid"));
+    const userid = Entity.GetEntitiesByClassID(Event.GetString("userid"));
 
     if (Entity.IsLocalPlayer(userid))
         currently_defusing = true;
@@ -1482,41 +1498,46 @@ function lowdeltav2() {
 
 Cheat.RegisterCallback("CreateMove", "lowdeltav2");
 
-//Leg Fucker
-var Legbreaker = true;
-var Firstloop = 1;
-var Secondloop = 1;
 
-function LegBreaker() {
-    if (config.leg_breaker.value) {
-        var Amount = 0
-        if (Legbreaker == true) {
-            if (Secondloop > Amount) {
-                BreakLeg = false;
-                Secondloop = 0;
-                UI.SetValue(["Misc.", "Movement", "Leg movement"], 1)
-                UI.SetValue(["Rage", "Anti Aim", "Jitter move"], 1)
-            }
-        } else if (BreakLeg == false) {
-            if (Secondloop > Amount) {
-                BreakLeg = true;
-                Secondloop = 0;
-                UI.SetValue(["Misc.", "Movement", "Leg movement"], 2)
-                UI.SetValue(["Rage", "Anti Aim", "Jitter move"], 0)
-            }
+function slowwalkspeed() {
+    if (config.slowwalkspeed.value && config.low_delta_slowwalk.value && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "Slow walk"])) {
+        var movedirection = [0, 0, 0];
+        if (Input.IsKeyPressed(0x57)) { //W
+            movedirection[0] += config.slowwalkspeed.value;
         }
-        Secondloop = Secondloop + 1;
+        if (Input.IsKeyPressed(0x44)) { //S
+            movedirection[1] += config.slowwalkspeed.value;
+        }
+        if (Input.IsKeyPressed(0x41)) { //A
+            movedirection[1] -= config.slowwalkspeed.value;
+        }
+        if (Input.IsKeyPressed(0x53)) { //D
+            movedirection[0] -= config.slowwalkspeed.value;
+        }
+        UserCMD.SetMovement(movedirection);  
     }
 }
+Cheat.RegisterCallback("CreateMove", "slowwalkspeed")
 
-Cheat.RegisterCallback("Draw", "LegBreaker");
-
-
-//LBY Flicker
-
-
-
-
+//Leg Fucker
+function onShakingLegs() {
+    if (config.leg_breaker.value) {
+        if (Globals.Tickcount() % GetMathRandom(4, 7) == 0) {
+            switch (UI.GetValue(["Misc.", "Movement", "Leg movement"])) {
+                case 0:
+                    UI.SetValue(["Misc.", "Movement", "Leg movement"], 2);
+                    break;
+                case 1:
+                    UI.SetValue(["Misc.", "Movement", "Leg movement"], 0);
+                    break;
+                case 2:
+                    UI.SetValue(["Misc.", "Movement", "Leg movement"], 1);
+                    break;
+            }
+        }
+    }
+}
+Cheat.RegisterCallback("CreateMove", "onShakingLegs");
 // Advanced fakelag fully done
 function AuroraFakelag() {
     if (config.advanced_fakelag.value & (1 << 0)) {
@@ -1529,20 +1550,14 @@ function AuroraFakelag() {
         UI.SetValue(["Rage", "Fake Lag", "General", "Limit"], Globals.Tickcount() % 2 ? 1.4 : 13);
         UI.SetValue(["Rage", "Fake Lag", "General", "Jitter"], (Globals.Tickcount() % 20 ? 14 : 13) + 12);
         UI.SetValue(["Rage", "Fake Lag", "General", "Trigger limit"], Globals.Tickcount() % 2 ? 1.2 : 14);
-    } else if (config.advanced_fakelag.value & (1 << 0)) {
-        UI.SetValue(["Rage", "Fake Lag", "General", "Enabled"], 1);
     }
 };
 
 function KrFLDisable() {
     if (config.leg_breaker.value & (1 << 0) && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "Fake duck"])) {
-        UI.SetValue(["Rage", "Fake Lag", "General", "Enabled"], 1);
-        UI.SetValue(["Rage", "Fake Lag", "General", "Limit"], 13);
-        UI.SetValue(["Rage", "Fake Lag", "General", "Jitter"], 2);
+        UI.SetValue(["Rage", "Fake Lag", "General", "Enabled"], 0);
     } else if (config.leg_breaker.value & (2 << 0) && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "Fake duck"])) {
-        UI.SetValue(["Rage", "Fake Lag", "General", "Enabled"], 1);
-        UI.SetValue(["Rage", "Fake Lag", "General", "Limit"], 13);
-        UI.SetValue(["Rage", "Fake Lag", "General", "Jitter"], 2);
+        UI.SetValue(["Rage", "Fake Lag", "General", "Enabled"], 0);
     }
 };
 
@@ -2059,6 +2074,15 @@ function hidechat() {
 }
 Cheat.RegisterCallback("CreateMove", "hidechat")
 
+function hidevc() {
+    if (config.hide_vc.value) {
+        Convar.SetInt("voice_enable", 0)
+    } else if (!config.hide_vc.value || !config.hide_chat.value) {
+        Convar.SetInt("voice_enable", 1)
+    }
+}
+Cheat.RegisterCallback("CreateMove", "hidevc")
+
 //Healthshot effect
 var alpha = 0;
 var size = 0;
@@ -2099,9 +2123,8 @@ function on_death() {
         size = 360;
     }
 }
-
-Global.RegisterCallback("player_death", "on_death");
-Global.RegisterCallback("Draw", "render_effect");
+Cheat.RegisterCallback("player_death", "on_death");
+Cheat.RegisterCallback("Draw", "render_effect");
 
 // Upon startup shows Aurora ASCII art
 
