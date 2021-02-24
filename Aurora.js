@@ -1,14 +1,10 @@
-//UPDATES for V1.1:
-//Added GUI
-//Removed Simple Clantag
-//Fixed Static + Fancy Clantags
-//Removed Indicators
-//Reworked Slow walk AA
-//Added Kill effect
-//Hotkey list can now be dragged while only GUI is open
-//Added Disable VC button
-//Added custom slow walk speed
-//Added Load config button on main startup screen
+//UPDATES for V1.2:
+// Reworked Anti-Brute
+// Fixed watermark displaying while in main menu
+// Added Recharge on swap
+// Added Rainbow Border
+// Added Fish esp
+// Added Chicken esp
 
 debugbuild = Cheat.GetUsername() == "Apbrick" || Cheat.GetUsername() == "geinibba3413" || Cheat.GetUsername() == "Heneston";
 betabuild = Cheat.GetUsername() == "Brexan" || Cheat.GetUsername() == "avatar" || Cheat.GetUsername() == "Zapzter" || Cheat.GetUsername() == "xyren";
@@ -124,16 +120,21 @@ const config = {
     leg_breaker: checkbox_t(),
     Aurora_doubletap: dropdown_t(),
     fast_recharge: checkbox_t(),
+    weapon_swap_recharge: checkbox_t(),
     advanced_fakelag: dropdown_t(),
+    FLonRoundEnd: checkbox_t(),
     fake_lag_min: slider_t(),
     fake_lag_max: slider_t(),
-    //indicators: dropdown_t(),
+    indicators: dropdown_t(),
     hotkey_list: checkbox_t(),
     aspect_ratio: checkbox_t(),
     aspect_ratio_slider: slider_t(),
     healthshot_effect: checkbox_t(),
     healthshot_effect_strongness: slider_t(),
     healthshot_color: color_picker_t(255, 255, 255, 255),
+    rainbow_bar: checkbox_t(),
+    rainbow_bar_speed: slider_t(),
+    customesp: dropdown_t(),
     clantag: dropdown_t(),
     hide_chat: checkbox_t(),
     hide_vc: checkbox_t(),
@@ -163,6 +164,10 @@ function on_cmove() {
 
 function on_paint() {
     menu.render();
+}
+
+function on_unload() {
+    input_system.enable_mouse_input(false);
 }
 
 /* region: input_system */
@@ -254,11 +259,11 @@ config_system.save = function () {
         const object = config[variable];
 
         // convert variable to JSON and save it to file
-        DataFile.SetKey("config.Aurora", variable, JSON.stringify(object));
+        DataFile.SetKey("config.aurora", variable, JSON.stringify(object));
     }
 
     // save/create file
-    DataFile.Save("config.Aurora");
+    DataFile.Save("config.aurora");
 
     // log
     Cheat.Print("[Aurora] Configuration saved.\n");
@@ -267,12 +272,12 @@ config_system.save = function () {
 config_system.load = function () {
 
     // load the file
-    DataFile.Load("config.Aurora");
+    DataFile.Load("config.aurora");
 
     // loop thru all config variables
     for (var variable in config) {
         // get the JSON value
-        var string = DataFile.GetKey("config.Aurora", variable);
+        var string = DataFile.GetKey("config.aurora", variable);
 
         // check if JSON isn't valid
         if (!string)
@@ -358,7 +363,7 @@ menu.render = function () {
                         Render.String(menu.x + 120, menu.y + 65, 0, "Welcome to Aurora " + Cheat.GetUsername(), [255, 255, 255, 205], menu.font)
                         Render.String(menu.x + 120, menu.y + 78, 0, "Join our discord for support", [255, 255, 255, 205], menu.font)
                         Render.String(menu.x + 120, menu.y + 91, 0, "discord.buyaurora.today", [255, 255, 255, 205], menu.font)
-                        Render.String(menu.x + 120, menu.y + 104, 0, "Current version: V 1.1", [255, 255, 255, 205], menu.font)
+                        Render.String(menu.x + 120, menu.y + 104, 0, "Current version: V 1.2", [255, 255, 255, 205], menu.font)
                         menu.button("Load config", config_system.load);
                     }
                     break;
@@ -407,7 +412,13 @@ menu.render = function () {
                 case 0:
                     menu.groupbox(menu.x + 110, menu.y + 35, 285, 260, "groupbox 3", false); {
                         menu.combobox("Aurora Doubletap", ["None", "Fast", "Quick", "Supersonic"], "Aurora_doubletap");
-                        menu.checkbox("Fast Recharge", "fast_recharge");
+                        function dtshow() {
+                            if (config.Aurora_doubletap.value == 1 || config.Aurora_doubletap.value == 2 || config.Aurora_doubletap.value == 3) {
+                                menu.checkbox("Fast Recharge", "fast_recharge");
+                                menu.checkbox("Recharge on swap", "weapon_swap_recharge");
+                            }
+                        }
+                        dtshow();
                     }
                     break;
             }
@@ -419,6 +430,13 @@ menu.render = function () {
                 case 0:
                     menu.groupbox(menu.x + 110, menu.y + 35, 285, 260, "groupbox 3", false); {
                         menu.combobox("Advanced Fakelag", ["None", "Aurora", "Ideal Tick"], "advanced_fakelag");
+                        function FLroundend() {
+                            if (config.advanced_fakelag.value == 1 || config.advanced_fakelag.value == 2) {
+                                menu.checkbox("Disable on round end", "FLonRoundEnd")
+                            }
+                        }
+                        FLroundend();
+
                     }
                     break;
             }
@@ -429,7 +447,7 @@ menu.render = function () {
                 // first subtab
                 case 0:
                     menu.groupbox(menu.x + 110, menu.y + 35, 285, 260, "groupbox 3", false); {
-                        //menu.multibox("Indicators", ["Anti-Aim Mode", "Doubletap", "Advanced Fakelag"], "indicators");
+                        menu.multibox("Indicators", ["Anti-Aim Mode", "Doubletap", "Advanced Fakelag"], "indicators");
                         menu.checkbox("Hotkey List", "hotkey_list")
                         menu.checkbox("Aspect Ratio", "aspect_ratio")
                         function aspslider() {
@@ -446,6 +464,14 @@ menu.render = function () {
                             }
                         }
                         healthslider();
+                        menu.checkbox("Rainbow Bar", "rainbow_bar")
+                        function rainbowbar() {
+                            if (config.rainbow_bar.value) {
+                                menu.slider("   Speed", "rainbow_bar_speed", 0.01, 1, 0.01, true)
+                            }
+                        }
+                        rainbowbar();
+                        menu.multibox("MISC. ESP", ["Fish ESP", "Chicken ESP"], "customesp")
                     }
                     break;
             }
@@ -470,7 +496,7 @@ menu.render = function () {
                         menu.button("Save config", config_system.save);
                         menu.button("Load config", config_system.load);
                     }
-                    break;
+                    break; xZ
             }
             break;
         case 7:
@@ -1238,6 +1264,7 @@ var key_names = ["-", "mouse1", "mouse2", "break", "mouse3", "mouse4", "mouse5",
 
 Cheat.RegisterCallback("Draw", "on_paint")
 Cheat.RegisterCallback("CreateMove", "on_cmove")
+Cheat.RegisterCallback("Unload", "on_unload")
 
 
 //=======================================================================================================
@@ -1252,6 +1279,11 @@ function GetMathRandom(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max) + 1;
     return Math.floor(Math.random() * (max - min)) + min;
+}
+
+function getDropdownValue(value, index) {
+    var mask = 1 << index;
+    return value & mask ? true : false;
 }
 
 /*       None     */
@@ -1313,76 +1345,176 @@ Cheat.RegisterCallback("CreateMove", "AuroraMode");
 
 //Anti-Brute mode
 
-//timer
-var reset_time = 0;
-var timer_indicator = 0;
-var angle = 0;
-
-//caching
-ab_restrictions = UI.GetValue(["Config", "Cheat", "General", "Restrictions"]);
-ab_yaw_offset = UI.GetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"]);
-ab_jitter_offset = UI.GetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"]);
-ab_pitch_mode = UI.GetValue(["Rage", "Anti Aim", "General", "Pitch mode"]);
-ab_at_targets = UI.GetValue(["Rage", "Anti Aim", "Directions", "At targets"]);
-
-
-function Antibruteangle(c) {
-    if (c.chokedcommands == 0) {
-        if (c.in_use == 1) {
-            angle = Math.min(57, Math.abs(Entity.GetProp(Entity.GetLocalPlayer(), "m_flPoseParameter", 11) * 120 - 60))
-        } else {
-            angle = Math.min(57, Math.abs(Entity.GetProp(Entity.GetLocalPlayer(), "m_flPoseParameter", 11) * 120 - 60))
-        }
-    }
-};
-
-Cheat.RegisterCallback("setup_command", "Antibruteangle")
-
-function GetClosestPoint(A, B, P) {
-    var a_to_p = [P[1] - A[1], P[2] - A[2]];
-    var a_to_b = [B[1] - A[1], B[2] - A[2]];
-    var atb2 = a_to_b[1] ^ 2 + a_to_b[2] ^ 2;
-    var atp_dot_atb = a_to_p[1] * a_to_b[1] + a_to_p[2] * a_to_b[2]
-    var t = atp_dot_atb / atb2
-    return A[1] + a_to_b[1] * t, A[2] + a_to_b[2] * t;
+function radian(degree) {
+    return degree * Math.PI / 180.0;
 }
 
-var should_swap = false;
-var it = 0;
-var angles = [60, 20, -60]
+function ExtendVector(vector, angle, extension) {
+    var radianAngle = radian(angle);
+    return [extension * Math.cos(radianAngle) + vector[0], extension * Math.sin(radianAngle) + vector[1], vector[2]];
+}
 
+function VectorAdd(a, b) {
+    return [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+}
 
-function BulletImpact(c) {
-    if (config.aa_modes.value & (1 << 4)) {
-        var ent = Entity.GetEntityFromUserID(c.userid)
-        if (Entity.IsValid(entity) && Entity.IsEnemy(entity)) {
-            if (!Entity.IsDormant(entity)) {
-                var ent_shoot = Entity.GetProp(ent, "m_vecOrigin");
-                ent_shoot[3] = ent_shoot[3] + Entity.GetProp(ent, "m_vecViewOffset[2]");
-                var player_head = Entity.GetHitboxPosition(Entity.GetLocalPlayer(), 0);
-                var closest = GetClosestPoint(ent_shoot, [c.x, c.y, c.z], player_head);
-                var delta = [player_head[1] - closest[1], player_head[2] - closest[2]];
-                var delta_2d = Math.sqrt(delta[1] ^ 2 + delta[2] ^ 2);
+function VectorSubtract(a, b) {
+    return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+}
 
-                if (Math.abs(delta_2d) < 40) {
-                    it = it + 1
-                    should_swap = true
-                }
+function VectorMultiply(a, b) {
+    return [a[0] * b[0], a[1] * b[1], a[2] * b[2]];
+}
+
+function VectorLength(x, y, z) {
+    return Math.sqrt(x * x + y * y + z * z);
+}
+
+function VectorNormalize(vec) {
+    var length = VectorLength(vec[0], vec[1], vec[2]);
+    return [vec[0] / length, vec[1] / length, vec[2] / length];
+}
+
+function VectorDot(a, b) {
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
+
+function VectorDistance(a, b) {
+    return VectorLength(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+}
+
+function ClosestPointOnRay(target, rayStart, rayEnd) {
+    var to = VectorSubtract(target, rayStart);
+    var dir = VectorSubtract(rayEnd, rayStart);
+    var length = VectorLength(dir[0], dir[1], dir[2]);
+    dir = VectorNormalize(dir);
+
+    var rangeAlong = VectorDot(dir, to);
+    if (rangeAlong < 0.0) {
+        return rayStart;
+    }
+    if (rangeAlong > length) {
+        return rayEnd;
+    }
+    return VectorAdd(rayStart, VectorMultiply(dir, [rangeAlong, rangeAlong, rangeAlong]));
+}
+
+function Flip() {
+    UI.ToggleHotkey(["Rage", "Anti Aim", "General", "Key assignment", "AA Direction inverter"], "AA Inverter");
+}
+
+var lastHitTime = 0.0;
+var lastImpactTimes =
+    [
+        0.0
+    ];
+var lastImpacts =
+    [
+        [0.0, 0.0, 0.0]
+    ];
+
+function OnHurt() {
+    if (config.aa_modes.value == 4) {
+        if (Entity.GetEntityFromUserID(Event.GetInt("userid")) !== Entity.GetLocalPlayer()) return;
+        var hitbox = Event.GetInt('hitgroup');
+
+        if (hitbox == 1 || hitbox == 6 || hitbox == 7) {
+            var curtime = Global.Curtime();
+            if (Math.abs(lastHitTime - curtime) > 0.5) {
+                lastHitTime = curtime;
+                Flip();
             }
         }
     }
-};
+}
 
-Cheat.RegisterCallback("bullet_impact", "BulletImpact")
+function OnBulletImpact() {
+    if (config.aa_modes.value == 4) {
 
-function on_prestart() {
-    if (config.aa_modes.value & (1 << 4)) {
-        UI.SetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"], ab_yaw_offset);
-        UI.SetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"], ab_jitter_offset);
-        UI.SetValue(["Rage", "Anti Aim", "General", "Pitch mode"], ab_pitch_mode);
-        UI.SetValue(["Rage", "Anti Aim", "Directions", "At targets"], ab_at_targets);
+        var curtime = Global.Curtime();
+        if (Math.abs(lastHitTime - curtime) < 0.5) return;
+
+        var entity = Entity.GetEntityFromUserID(Event.GetInt("userid"));
+        var impact = [Event.GetFloat("x"), Event.GetFloat("y"), Event.GetFloat("z"), curtime];
+        var source;
+        if (Entity.IsValid(entity) && Entity.IsEnemy(entity)) {
+            if (!Entity.IsDormant(entity)) {
+                source = Entity.GetEyePosition(entity);
+            }
+            else if (Math.abs(lastImpactTimes[entity] - curtime) < 0.1) {
+                source = lastImpacts[entity];
+            }
+            else {
+                lastImpacts[entity] = impact;
+                lastImpactTimes[entity] = curtime;
+                return;
+            }
+            var local = Entity.GetLocalPlayer();
+            var localEye = Entity.GetEyePosition(local);
+            var localOrigin = Entity.GetProp(local, "CBaseEntity", "m_vecOrigin");
+            var localBody = VectorMultiply(VectorAdd(localEye, localOrigin), [0.5, 0.5, 0.5]);
+
+            var bodyVec = ClosestPointOnRay(localBody, source, impact);
+            var bodyDist = VectorDistance(localBody, bodyVec);
+
+            if (bodyDist < 85.0) {
+                var realAngle = Local.GetRealYaw();
+                var fakeAngle = Local.GetFakeYaw();
+
+                var headVec = ClosestPointOnRay(localEye, source, impact);
+                var headDist = VectorDistance(localEye, headVec);
+                var feetVec = ClosestPointOnRay(localOrigin, source, impact);
+                var feetDist = VectorDistance(localOrigin, feetVec);
+
+                var closestRayPoint;
+                var realPos;
+                var fakePos;
+
+                if (bodyDist < headDist && bodyDist < feetDist) {
+                    closestRayPoint = bodyVec;
+                    realPos = ExtendVector(bodyVec, realAngle + 180.0, 10.0);
+                    fakePos = ExtendVector(bodyVec, fakeAngle + 180.0, 10.0);
+                }
+                else if (feetDist < headDist) {
+                    closestRayPoint = feetVec;
+                    var realPos1 = ExtendVector(bodyVec, realAngle - 30.0 + 60.0, 10.0);
+                    var realPos2 = ExtendVector(bodyVec, realAngle - 30.0 - 60.0, 10.0);
+                    var fakePos1 = ExtendVector(bodyVec, fakeAngle - 30.0 + 60.0, 10.0);
+                    var fakePos2 = ExtendVector(bodyVec, fakeAngle - 30.0 - 60.0, 10.0);
+                    if (VectorDistance(feetVec, realPos1) < VectorDistance(feetVec, realPos2)) {
+                        realPos = realPos1;
+                    }
+                    else {
+                        realPos = realPos2;
+                    }
+                    if (VectorDistance(feetVec, fakePos1) < VectorDistance(feetVec, fakePos2)) {
+                        fakePos = fakePos1;
+                    }
+                    else {
+                        fakePos = fakePos2;
+                    }
+                }
+                else {
+                    closestRayPoint = headVec;
+                    realPos = ExtendVector(bodyVec, realAngle, 10.0);
+                    fakePos = ExtendVector(bodyVec, fakeAngle, 10.0);
+                }
+
+                if (VectorDistance(closestRayPoint, fakePos) < VectorDistance(closestRayPoint, realPos))        //they shot at our fake. they will probably not gonna shoot it again.
+                {
+                    lastHitTime = curtime;
+                    Flip();
+                }
+            }
+
+            lastImpacts[entity] = impact;
+            lastImpactTimes[entity] = curtime;
+        }
     }
 }
+
+Cheat.RegisterCallback("player_hurt", "OnHurt");
+Cheat.RegisterCallback("bullet_impact", "OnBulletImpact");
 
 // E Peek
 
@@ -1407,7 +1539,7 @@ function KratoEPeek() {
     if (!planted) {
         onReset()
     }
-    var Aurora_AA_EPeek_YAW = GetMathRandom(172, 179);
+    var Aurora_AA_EPeek_YAW = GetMathRandom(168, 174);
     if (!currently_defusing && !picking_hostage && config.e_peek.active) {
         AntiAim.SetOverride(1);
         UI.SetValue(["Config", "Cheat", "General", "Restrictions"], 0);
@@ -1493,19 +1625,19 @@ Cheat.RegisterCallback("CreateMove", "lowdeltav2");
 function slowwalkspeed() {
     if (config.slowwalkspeed.value && config.low_delta_slowwalk.value && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "Slow walk"])) {
         var movedirection = [0, 0, 0];
-        if (Input.IsKeyPressed(0x57)) { //W
+        if (Input.IsKeyPressed(0x57)) {
             movedirection[0] += config.slowwalkspeed.value;
         }
-        if (Input.IsKeyPressed(0x44)) { //S
+        if (Input.IsKeyPressed(0x44)) {
             movedirection[1] += config.slowwalkspeed.value;
         }
-        if (Input.IsKeyPressed(0x41)) { //A
+        if (Input.IsKeyPressed(0x41)) {
             movedirection[1] -= config.slowwalkspeed.value;
         }
-        if (Input.IsKeyPressed(0x53)) { //D
+        if (Input.IsKeyPressed(0x53)) {
             movedirection[0] -= config.slowwalkspeed.value;
         }
-        UserCMD.SetMovement(movedirection);  
+        UserCMD.SetMovement(movedirection);
     }
 }
 Cheat.RegisterCallback("CreateMove", "slowwalkspeed")
@@ -1514,16 +1646,12 @@ Cheat.RegisterCallback("CreateMove", "slowwalkspeed")
 function onShakingLegs() {
     if (config.leg_breaker.value) {
         if (Globals.Tickcount() % GetMathRandom(4, 7) == 0) {
-            switch (UI.GetValue(["Misc.", "Movement", "Leg movement"])) {
-                case 0:
-                    UI.SetValue(["Misc.", "Movement", "Leg movement"], 2);
-                    break;
-                case 1:
-                    UI.SetValue(["Misc.", "Movement", "Leg movement"], 0);
-                    break;
-                case 2:
-                    UI.SetValue(["Misc.", "Movement", "Leg movement"], 1);
-                    break;
+            if (UI.GetValue(["Misc.", "Movement", "Leg movement"]) == 2) {
+                UI.SetValue(["Misc.", "Movement", "Leg movement"], 1);
+            } else if (UI.GetValue(["Misc.", "Movement", "Leg movement"]) == 1) {
+                UI.SetValue(["Misc.", "Movement", "Leg movement"], 0);
+            } else if (UI.GetValue(["Misc.", "Movement", "Leg movement"]) == 0) {
+                UI.SetValue(["Misc.", "Movement", "Leg movement"], 2);
             }
         }
     }
@@ -1531,18 +1659,29 @@ function onShakingLegs() {
 Cheat.RegisterCallback("CreateMove", "onShakingLegs");
 // Advanced fakelag fully done
 function AuroraFakelag() {
-    if (config.advanced_fakelag.value & (1 << 0)) {
+    if (config.advanced_fakelag.value == 1) {
         UI.SetValue(["Rage", "Fake Lag", "General", "Enabled"], 1);
         UI.SetValue(["Rage", "Fake Lag", "General", "Limit"], (GetMathRandom(9, 12)));
         UI.SetValue(["Rage", "Fake Lag", "General", "Jitter"], (GetMathRandom(2, 8)));
         UI.SetValue(["Rage", "Fake Lag", "General", "Trigger limit"], (GetMathRandom(12, 14)));
-    } else if (config.advanced_fakelag.value & (2 << 0)) {
+    } else if (config.advanced_fakelag.value == 2) {
         UI.SetValue(["Rage", "Fake Lag", "General", "Enabled"], 1);
         UI.SetValue(["Rage", "Fake Lag", "General", "Limit"], Globals.Tickcount() % 2 ? 1.4 : 13);
         UI.SetValue(["Rage", "Fake Lag", "General", "Jitter"], (Globals.Tickcount() % 20 ? 14 : 13) + 12);
         UI.SetValue(["Rage", "Fake Lag", "General", "Trigger limit"], Globals.Tickcount() % 2 ? 1.2 : 14);
     }
 };
+function FLonRoundEnd() {
+    if (config.advanced_fakelag.value == 1 || config.advanced_fakelag.value == 2 && config.FLonRoundEnd.value) {
+        UI.SetValue(["Rage", "Fake Lag", "General", "Enabled"], 0);
+    } else { return }
+}
+function FLonRoundStart() {
+    if (config.advanced_fakelag.value == 1 || config.advanced_fakelag.value == 2 && config.FLonRoundEnd.value) {
+        UI.SetValue(["Rage", "Fake Lag", "General", "Enabled"], 1);
+    } else { return }
+}
+
 
 function KrFLDisable() {
     if (config.leg_breaker.value & (1 << 0) && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "Fake duck"])) {
@@ -1553,7 +1692,8 @@ function KrFLDisable() {
 };
 
 
-
+Cheat.RegisterCallback("round_end", "FLonRoundEnd")
+Cheat.RegisterCallback("round_start", "FLonRoundStart")
 Cheat.RegisterCallback("CreateMove", "KrFLDisable");
 Cheat.RegisterCallback("CreateMove", "AuroraFakelag");
 
@@ -1623,12 +1763,10 @@ Cheat.RegisterCallback("CreateMove", "FastRecharge");
 
 
 //clantag -- Finished
-//Fuck you jordan for ruining the clantag in the lua!
 
 var client_set_clan_tag = Local.SetClanTag;
 var oldTick = Globals.Tickcount();
 var AuroraNL = ["/", "/\\", "A", "A|", "A|_", "A|_|", "Au", "Au|", "Au|‾", "Aur", "Aur0", "Auro", "Auro|", "Auro|‾", "Auror", "Auror/", "Auror/\\", "Aurora", "Aurora", "Auror", "Auro", "Aur", "Au", "A", "", "", ""];
-var AuroraGS = ["A", "Au", "Aur", "Auro", "Auror", "Aurora", "Aurora", "Auror", "Auro", "Aur", "Au", "A", ""];
 var AuroraStatic = "Aurora"
 const globaltime = Globals.Realtime();
 const delay = 0.1;
@@ -1854,59 +1992,61 @@ Cheat.RegisterCallback("Draw", "AuroraHotkey");
 //Watermark --  Finished
 
 function WatermarkText() {
-    var getserverstring = World.GetServerString();
-    if (getserverstring == "local server") {
+    if (World.GetServerString() == "local server") {
         return "local"
     }
-    else if (getserverstring == "valve [aimstep]") {
+    else if (World.GetServerString() == "valve [aimstep]") {
         return "valve"
     }
-    else if (getserverstring != "valve [aimstep]" && getserverstring != "local server") {
+    else if (World.GetServerString() == "") {
+        return "main menu"
+    } else {
         return "metamod"
-    }
-    else {
-        return "release"
     }
 }
 
 function watermark() {
-    UI.SetValue(["Misc.", "Helpers", "General", "Watermark"], 0);
-    Number.prototype.zeroPad = function () {
-        return ('0' + this).slice(-2);
-    };
+    if (Entity.IsAlive(Entity.GetLocalPlayer())) {
+        UI.SetValue(["Misc.", "Helpers", "General", "Watermark"], 0);
+        Number.prototype.zeroPad = function () {
+            return ('0' + this).slice(-2);
+        };
 
 
-    var rate = 1 / Globals.Tickrate()
-    var tickrate = Math.floor(rate)
-    const DateNow = new Date();
-    const CurrentTime = DateNow.getHours().zeroPad() + ":" + DateNow.getMinutes().zeroPad() + ":" + DateNow.getSeconds().zeroPad();
-    var tickrate = Global.Tickrate()
-    const ping = Math.floor(Global.Latency() * 1000 / 1.5);
-    var servertext = WatermarkText().toString();
-    var getAccent = menu.get_color(config.menu_color);
-    var textdebug = "Aurora [debug] | " + Cheat.GetUsername() + " | " + tickrate + "ticks | " + ping + "ms | " + CurrentTime;
-    var textrelease = "Aurora [" + servertext + "] | " + Cheat.GetUsername() + " | " + tickrate + " ticks | " + ping + "ms | " + CurrentTime;
-    var textbeta = "Aurora [beta] | " + Cheat.GetUsername() + " | " + tickrate + " ticks | " + ping + "ms | " + CurrentTime;
+        var rate = 1 / Globals.Tickrate()
+        var tickrate = Math.floor(rate)
+        const DateNow = new Date();
+        const CurrentTime = DateNow.getHours().zeroPad() + ":" + DateNow.getMinutes().zeroPad() + ":" + DateNow.getSeconds().zeroPad();
+        var tickrate = Global.Tickrate()
+        const ping = Math.floor(Global.Latency() * 1000 / 1.5);
+        var servertext = WatermarkText().toString();
+        var getAccent = menu.get_color(config.menu_color);
+        var textdebug = "Aurora [debug] | " + Cheat.GetUsername() + " | " + tickrate + "ticks | " + ping + "ms | " + CurrentTime;
+        var textrelease = "Aurora [" + servertext + "] | " + Cheat.GetUsername() + " | " + tickrate + " ticks | " + ping + "ms | " + CurrentTime;
+        var textbeta = "Aurora [beta] | " + Cheat.GetUsername() + " | " + tickrate + " ticks | " + ping + "ms | " + CurrentTime;
 
-    var fonten = Render.GetFont("verdana.ttf", 10, true);
-    if (debugbuild)
-        var w = Render.TextSize(textdebug, fonten)[0] + 10;
-    else if (betabuild)
-        var w = Render.TextSize(textbeta, fonten)[0] + 10;
-    else
-        var w = Render.TextSize(textrelease, fonten)[0] + 10;
-    var x = Global.GetScreenSize()[0];
+        var fonten = Render.GetFont("verdana.ttf", 10, true);
+        if (debugbuild) {
+            var w = Render.TextSize(textdebug, fonten)[0] + 10;
+        } else if (betabuild) {
+            var w = Render.TextSize(textbeta, fonten)[0] + 10;
+        } else {
+            var w = Render.TextSize(textrelease, fonten)[0] + 10;
+        }
+        var x = Global.GetScreenSize()[0];
 
-    var x = x - w - 10;
+        var x = x - w - 10;
 
-    Render.FilledRect(x - 25, 11 + 2, w, 18, [17, 17, 17, 155]);
-    Render.FilledRect(x - 25, 11, w, 2, [getAccent[0], getAccent[1], getAccent[2], 222]);
-    if (debugbuild)
-        Render.String(x - 23, 11 + 3, 0, textdebug, [255, 255, 255, 255], fonten);
-    else if (betabuild)
-        Render.String(x - 23, 11 + 3, 0, textbeta, [255, 255, 255, 255], fonten);
-    else
-        Render.String(x - 23, 11 + 3, 0, textrelease, [255, 255, 255, 255], fonten);
+        Render.FilledRect(x - 25, 11 + 2, w, 18, [17, 17, 17, 155]);
+        Render.FilledRect(x - 25, 11, w, 2, [getAccent[0], getAccent[1], getAccent[2], 222]);
+        if (debugbuild) {
+            Render.String(x - 23, 11 + 3, 0, textdebug, [255, 255, 255, 255], fonten);
+        } else if (betabuild) {
+            Render.String(x - 23, 11 + 3, 0, textbeta, [255, 255, 255, 255], fonten);
+        } else {
+            Render.String(x - 23, 11 + 3, 0, textrelease, [255, 255, 255, 255], fonten);
+        }
+    }
 }
 Cheat.RegisterCallback("Draw", "watermark");
 
@@ -1914,129 +2054,120 @@ Cheat.RegisterCallback("Draw", "watermark");
 
 
 
-// Indicators (currently disabled)
-function aatext() {
-    if (config.aa_modes.value & (1 << 0)) {
-        return "None"
-    } else if (config.aa_modes.value & (1 << 1)) {
-        return "Simple"
-    } else if (config.aa_modes.value & (1 << 2)) {
-        return "Advanced"
-    } else if (config.aa_modes.value & (1 << 1)) {
-        return "Kratos"
-    } else if (config.aa_modes.value & (1 << 1)) {
-        return "Anti-Brute"
+function aaText() {
+    var returnVar = "";
+
+    if (config.aa_modes.value == 0) {
+        returnVar = "None";
+    } else if (config.aa_modes.value == 1) {
+        returnVar = "Simple";
+    } else if (config.aa_modes.value == 2) {
+        returnVar = "Advanced";
+    } else if (config.aa_modes.value == 3) {
+        returnVar = "Aurora";
+    } else if (config.aa_modes.value == 4) {
+        returnVar = "Anti-Brute";
     }
-}
-function dttext() { // None, fast, quck, supersonice
-    if (config.Aurora_doubletap.value & (1 << 0)) {
-        return "None"
-    } else if (config.Aurora_doubletap.value & (1 << 1)) {
-        return "Fast"
-    } else if (config.Aurora_doubletap.value & (1 << 2)) {
-        return "Quick"
-    } else if (config.Aurora_doubletap.value & (1 << 1)) {
-        return "Supersonic"
-    }
+
+    return returnVar;
 }
 
-function fltext() {
-    if (config.advanced_fakelag.value & (1 << 0)) {
-        return "None"
-    } else if (config.advanced_fakelag.value & (1 << 1)) {
-        return "Aurora FL"
-    } else if (config.advanced_fakelag.value & (1 << 2)) {
-        return "Custom FL"
+function dtText() {
+    var returnVar = "";
+
+    if (config.Aurora_doubletap.value == 0) {
+        returnVar = "None";
+    } else if (config.Aurora_doubletap.value == 1) {
+        returnVar = "Fast";
+    } else if (config.Aurora_doubletap.value == 2) {
+        returnVar = "Quick";
+    } else if (config.Aurora_doubletap.value == 3) {
+        returnVar = "Supersonic";
     }
+
+    return returnVar;
 }
 
-function indicators() {
-    var screenx = Global.GetScreenSize()[0];
-    var screeny = Global.GetScreenSize()[1];
-    var color = menu.get_color(config.menu_color);
-    var fonten2 = Render.GetFont("verdana.ttf", 10, true);
+function flText() {
+    var returnVar = "";
 
-    Render.Arc = function (x, y, radius, radius_inner, start_angle, end_angle, segments, color) {
-        segments = 360 / segments;
-        for (var i = start_angle; i < start_angle + end_angle; i = i + segments) {
-            var rad = i * Math.PI / 180;
-            var rad2 = (i + segments) * Math.PI / 180;
-            var rad_cos = Math.cos(rad);
-            var rad_sin = Math.sin(rad);
-            var rad2_cos = Math.cos(rad2);
-            var rad2_sin = Math.sin(rad2);
-            var x1_inner = x + rad_cos * radius_inner;
-            var y1_inner = y + rad_sin * radius_inner;
-            var x1_outer = x + rad_cos * radius;
-            var y1_outer = y + rad_sin * radius;
-            var x2_inner = x + rad2_cos * radius_inner;
-            var y2_inner = y + rad2_sin * radius_inner;
-            var x2_outer = x + rad2_cos * radius;
-            var y2_outer = y + rad2_sin * radius;
+    if (config.advanced_fakelag.value == 0) {
+        returnVar = "None";
+    } else if (config.advanced_fakelag.value == 1) {
+        returnVar = "Aurora Fakelag";
+    } else if (config.advanced_fakelag.value == 2) {
+        returnVar = "  Ideal Tick";
+    }
 
-            Render.Polygon([
-                [x1_outer, y1_outer],
-                [x2_outer, y2_outer],
-                [x1_inner, y1_inner]],
-                color
-            );
+    return returnVar;
+}
 
-            Render.Polygon([
-                [x1_inner, y1_inner],
-                [x2_outer, y2_outer],
-                [x2_inner, y2_inner]],
-                color
-            );
+function stText() {
+    var returnVar = "";
+
+    if (World.GetServerString() == "local server") {
+        returnVar = "local";
+    } else if (World.GetServerString() == "valve [aimstep]") {
+        returnVar = "valve";
+    } else if (World.GetServerString() != "valve [aimstep]" && World.GetServerString() != "local server") {
+        returnVar = "metamod";
+    } else {
+        returnVar = "release";
+    }
+
+    return returnVar;
+}
+
+function onIndicators() {
+    var aay = 25
+    var dty = 35
+    var fly = 45
+    // y value for indicators
+    if (getDropdownValue(config.indicators.value, 0)) {
+        var aay = 25
+    } else if (getDropdownValue(config.indicators.value, 0) && (getDropdownValue(config.indicators.value, 1))) {
+        var aay = 25
+        var fly = 35
+    } else if (getDropdownValue(config.indicators.value, 0) && (getDropdownValue(config.indicators.value, 2))) {
+        var aay = 25
+        var dty = 35
+    }
+    else if (getDropdownValue(config.indicators.value, 1)) {
+        var dty = 25
+    } else if (getDropdownValue(config.indicators.value, 1) && (getDropdownValue(config.indicators.value, 2))) {
+        var fly = 25
+        var dty = 35
+    }
+    else if (getDropdownValue(config.indicators.value, 2)) {
+        var fly = 25
+    } else if (getDropdownValue(config.indicators.value, 1) && getDropdownValue(config.indicators.value, 2) && getDropdownValue(config.indicators.value, 3)) {
+        var aay = 25
+        var dty = 35
+        var fly = 45
+    }
+    if (Entity.IsAlive(Entity.GetLocalPlayer())) {
+        var font = Render.GetFont("verdana.ttf", 10, true);
+        var x = (Global.GetScreenSize()[0] / 2);
+        var y = (Global.GetScreenSize()[1] / 2);
+        var color = menu.get_color(config.menu_color);
+
+        if (getDropdownValue(config.indicators.value, 0)) {
+            Render.String(x - 30, y + 15, 0, "Aurora", color, font);
+            Render.String(x + 28, y + 15, 0, String(Math.min(Math.abs(Math.round(Local.GetFakeYaw() - Local.GetRealYaw() / 2)), 60)), color, font);
+            Render.String(x - 12, y + aay, 0, aaText(), color, font);
+        }
+
+        if (getDropdownValue(config.indicators.value, 1)) {
+            Render.String(x - 12, y + dty, 0, "   " + dtText(), color, font);
+            Render.String(x - 30, y + dty, 0, "  DT", [184 - 35 * Exploit.GetCharge(), 6 + 178 * Exploit.GetCharge(), 6, 255], font);
+        }
+
+        if (getDropdownValue(config.indicators.value, 2)) {
+            Render.String(x - 30, y + fly, 0, flText(), color, font);
         }
     }
-    Render.OutlineString = function (x, y, a, s, c, f) {
-        const alpha = Math.min(255, c[3]);
-        Render.String(x - 1, y - 1, a, s, [0, 0, 0, 55], f);
-        Render.String(x - 1, y + 1, a, s, [0, 0, 0, 55], f);
-        Render.String(x + 1, y - 1, a, s, [0, 0, 0, 55], f);
-        Render.String(x + 1, y + 1, a, s, [0, 0, 0, 55], f);
-        Render.String(x, y, a, s, c, f);
-    }
-
-    var fake = Local.GetFakeYaw();
-    var real = Local.GetRealYaw();
-    var delta = Math.min(Math.abs(real - fake) / 2, 60).toFixed(0);
-    iloveyou = Number(delta);
-    var dt_active = UI.GetValue(["Rage", "Exploits", "Key assignment", "Double tap"]);
-    var advfl_active = config.advanced_fakelag.value;
-    var x = screenx / 2
-    var y = screeny / 2
-    var text = delta
-    var w = Render.TextSize(text, fonten2)[0] + 10;
-    const charge = Exploit.GetCharge();
-
-    //TEXT FOR IND
-    var aamodes_text = aatext();
-    var dtmodes_text = dttext();
-    var flmodes_text = fltext();
-
-    if (dt_active) {
-        dt_height = 45
-    } else {
-        dt_height = 35
-    }
-    Render.Arc(x + w + 19, y + 19, 1.4, 0.5, 200, 360, 100, color);;
-    Render.OutlineString(x - 30, y + 15, 0, "Aurora", color, fonten2);
-    Render.OutlineString(x + 28, y + 15, 0, delta, color, fonten2);
-    if (config.indicators.value & (1 << 2)) {
-        Render.OutlineString(x - 12, y + 25, 0, aamodes_text, [255, 255, 255, 255], fonten2);
-    }
-    if (dt_active && config.indicators.value & (1 << 0))
-        Render.OutlineString(x - 12, y + 35, 0, "   " + dtmodes_text, [255, 255, 255, 255], fonten2);
-    else;
-    if (dt_active && config.indicators.value & (1 << 0))
-        Render.OutlineString(x - 30, y + 35, 0, "DT", [184 - 35 * charge, 6 + 178 * charge, 6, 255], fonten2);
-    else;
-    if (advfl_active && config.indicators.value & (1 << 1))
-        Render.OutlineString(x - 30, y + dt_height, 0, flmodes_text, color, fonten2);
-    else;
 }
-//Cheat.RegisterCallback("Draw", "indicators")
+Cheat.RegisterCallback("Draw", "onIndicators")
 
 //Aspect Ratio
 function AspectRatio() {
@@ -2116,77 +2247,178 @@ function on_death() {
 Cheat.RegisterCallback("player_death", "on_death");
 Cheat.RegisterCallback("Draw", "render_effect");
 
+//Recharge on swap
+//swap_recharge
+
+function onSwapRecharge() {
+    if (config.weapon_swap_recharge.value) {
+        var itemArray = ["CDecoyGrenade", "CHEGrenade", "CIncendiaryGrenade", "CSmokeGrenade", "CMolotovGrenade", "CC4", "CKnife"];
+        for (var i = 0; i < itemArray.length; i++) {
+            if (Entity.GetClassName(Entity.GetWeapon(Entity.GetLocalPlayer())) == itemArray[i]) {
+                UI.SetValue(["Rage", "Exploits", "General", "Double tap"], 0);
+            } else {
+                UI.SetValue(["Rage", "Exploits", "General", "Double tap"], 1);
+            }
+        }
+    }
+}
+
+Cheat.RegisterCallback("CreateMove", "onSwapRecharge")
+
+//Rainbow Bar
+
+var screen_width = Math.round(Global.GetScreenSize()[0]);
+var screen_length = Math.round(Global.GetScreenSize()[1]);
+function HSVtoRGB(h, s, v) {
+    var r, g, b, i, f, p, q, t;
+
+    i = Math.floor(h * 6);
+    f = h * 6 - i;
+    p = v * (1 - s);
+    q = v * (1 - f * s);
+    t = v * (1 - (1 - f) * s);
+
+    switch (i % 6) {
+        case 0: r = v, g = t, b = p; break;
+        case 1: r = q, g = v, b = p; break;
+        case 2: r = p, g = v, b = t; break;
+        case 3: r = p, g = q, b = v; break;
+        case 4: r = t, g = p, b = v; break;
+        case 5: r = v, g = p, b = q; break;
+    }
+
+    return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
+}
+
+function DrawRainbow() {
+    if (config.rainbow_bar.value) {
+        var colors = HSVtoRGB(Global.Realtime() * config.rainbow_bar_speed.value, 1, 1);
+        //up
+        Render.GradientRect(0, 0, screen_width / 2, 3, 1, [colors.g, colors.b, colors.r, 255], [colors.r, colors.g, colors.b, 255]);
+        Render.GradientRect(screen_width / 2, 0, screen_width / 2, 3, 1, [colors.r, colors.g, colors.b, 255], [colors.b, colors.r, colors.g, 255]);
+        //left
+        Render.GradientRect(0, 0, 3, screen_length, 0, [colors.g, colors.b, colors.r, 255], [colors.r, colors.g, colors.b, 255]);
+        //right
+        Render.GradientRect(screen_width - 3, 0, 3, screen_length, 0, [colors.b, colors.r, colors.g, 255], [colors.g, colors.b, colors.r, 255]);
+        //down
+        Render.GradientRect(screen_width / 2, screen_length - 3, screen_width / 2, 3, 1, [colors.b, colors.r, colors.g, 255], [colors.g, colors.b, colors.r, 255]);
+        Render.GradientRect(0, screen_length - 3, screen_width / 2, 3, 1, [colors.r, colors.g, colors.b, 255], [colors.b, colors.r, colors.g, 255]);
+    }
+}
+
+Global.RegisterCallback("Draw", "DrawRainbow");
+
+
+//FISH / Chicken ESP
+Render.OutlinedString = function (x, y, text, color, font) {
+    Render.String(x, y + 1, 0, text, [0, 0, 0, 255], font);
+    Render.String(x, y, 0, text, color, font);
+}
+
+Render.OutlinedRectangle = function (x, y, w, h, color, color2) {
+    Render.Rect(x, y, w, h, color);
+    Render.Rect(x - 1, y - 1, w + 2, h + 2, color2);
+    Render.Rect(x + 1, y + 1, w - 2, h - 2, color2);
+}
+
+function CH_FISHESP() {
+    var font = Render.GetFont("verdana.ttf", 10, true);
+    var textSize_fish = { x: Render.TextSize("  Fish", font)[0] };
+    var textSize_chicken = { x: Render.TextSize("Chicken", font)[0] };
+
+    var fishes = Entity.GetEntitiesByClassID(75);
+    var chickens = Entity.GetEntitiesByClassID(36);
+    if (config.customesp.value & (1 << 0)) {
+        for (var i = 0; i < fishes.length; i++) {
+            var renderOrigin = Entity.GetRenderOrigin(fishes[i]);
+            var worldToScreen = { x: Render.WorldToScreen(renderOrigin)[0], y: Render.WorldToScreen(renderOrigin)[1] };
+
+            Render.OutlinedString(worldToScreen.x + (textSize_fish.x / 2) - 25, worldToScreen.y - 15, "   Fish", [255, 255, 255, 255], font);
+            Render.OutlinedRectangle(worldToScreen.x - 5, worldToScreen.y - 4, 15, 35, [255, 255, 255, 255], [10, 10, 10, 80]);
+        }
+    } if (config.customesp.value & (1 << 1)) {
+        for (var i = 0; i < chickens.length; i++) {
+            var renderOrigin = Entity.GetRenderOrigin(chickens[i]);
+            var worldToScreen = { x: Render.WorldToScreen(renderOrigin)[0], y: Render.WorldToScreen(renderOrigin)[1] };
+
+            Render.OutlinedString(worldToScreen.x + (textSize_chicken.x / 2) - 25, worldToScreen.y - 55, "Chicken", [255, 255, 255, 255], font);
+            Render.OutlinedRectangle(worldToScreen.x + 2, worldToScreen.y - 40, 15, 35, [255, 255, 255, 255], [10, 10, 10, 80]);
+        }
+    }
+}
+
+Cheat.RegisterCallback("Draw", "CH_FISHESP");
+
+
+
 // Upon startup shows Aurora ASCII art
 
 function Onstartup() {
     var Variation = GetMathRandom(1, 7);
-        if (Variation == 1) {
-            Cheat.Print("      _____                                     \n")
-            Cheat.Print("     /  _  \\  __ _________  ________________    \n")
-            Cheat.Print("    /  /_\\  \\|  |  \\_  __ \\/  _ \\_  __ \\__  \\  \n")
-            Cheat.Print("   /    |    \\  |  /|  | \\(  <_> )  | \\// __ \\_ \n")
-            Cheat.Print("   \\____|__  /____/ |__|   \\____/|__|  (____  / \n")
-            Cheat.Print("           \\/                               \\/  \n")
-        } else if (Variation == 2) {
-            Cheat.Print("  /$$$$$$                                                   \n")
-            Cheat.Print(" /$$__  $$                                                  \n")
-            Cheat.Print("| $$  \\ $$ /$$   /$$  /$$$$$$   /$$$$$$   /$$$$$$   /$$$$$$ \n")
-            Cheat.Print("| $$$$$$$$| $$  | $$ /$$__  $$ /$$__  $$ /$$__  $$ |____  $$\n")
-            Cheat.Print("| $$__  $$| $$  | $$| $$  \\__/| $$  \\ $$| $$  \\__/  /$$$$$$$\n")
-            Cheat.Print("| $$  | $$| $$  | $$| $$      | $$  | $$| $$       /$$__  $$\n")
-            Cheat.Print("| $$  | $$|  $$$$$$/| $$      |  $$$$$$/| $$      |  $$$$$$$\n")
-            Cheat.Print("|__/  |__/ \\______/ |__/       \\______/ |__/       \\_______/\n")
-        } else if (Variation == 3) {
-            Cheat.Print("      _/_/                                                                      \n")
-            Cheat.Print("   _/    _/     _/    _/      _/  _/_/       _/_/       _/  _/_/       _/_/_/   \n")
-            Cheat.Print("  _/_/_/_/     _/    _/      _/_/         _/    _/     _/_/         _/    _/    \n")
-            Cheat.Print(" _/    _/     _/    _/      _/           _/    _/     _/           _/    _/     \n")
-            Cheat.Print("_/    _/       _/_/_/      _/             _/_/       _/             _/_/_/      \n")
-        } else if (Variation == 4) {
-            Cheat.Print(" ______     __  __     ______     ______     ______     ______    \n")
-            Cheat.Print("/\\  __ \\   /\\ \\/\\ \\   /\\  == \\   /\\  __ \\   /\\  == \\   /\\  __ \\   \n")
-            Cheat.Print("\\ \\  __ \\  \\ \\ \\_\\ \\  \\ \\  __<   \\ \\ \\/\\ \\  \\ \\  __<   \\ \\  __ \\  \n")
-            Cheat.Print(" \\ \\_\\ \\_\\  \\ \\_____\\  \\ \\_\\ \\_\\  \\ \\_____\\  \\ \\_\\ \\_\\  \\ \\_\\ \\_\\ \n")
-            Cheat.Print("  \\/_/\\/_/   \\/_____/   \\/_/ /_/   \\/_____/   \\/_/ /_/   \\/_/\\/_/ \n")
-        } else if (Variation == 5) {
-            Cheat.Print("    ___                                        \n")
-            Cheat.Print("   /   |  __  __   _____  ____    _____  ____ _\n")
-            Cheat.Print("  / /| | / / / /  / ___/ / __ \\  / ___/ / __ `/\n")
-            Cheat.Print(" / ___ |/ /_/ /  / /    / /_/ / / /    / /_/ / \n")
-            Cheat.Print("/_/  |_|\\__,_/  /_/     \\____/ /_/     \\__,_/  \n")
-        } else if (Variation == 6) {
-            Cheat.Print("               AAA                                                                                                      \n")
-            Cheat.Print("              A:::A                                                                                                     \n")
-            Cheat.Print("             A:::::A                                                                                                    \n")
-            Cheat.Print("            A:::::::A                                                                                                   \n")
-            Cheat.Print("           A:::::::::A        uuuuuu    uuuuuu rrrrr   rrrrrrrrr      ooooooooooo   rrrrr   rrrrrrrrr   aaaaaaaaaaaaa   \n")
-            Cheat.Print("          A:::::A:::::A       u::::u    u::::u r::::rrr:::::::::r   oo:::::::::::oo r::::rrr:::::::::r  a::::::::::::a  \n")
-            Cheat.Print("         A:::::A A:::::A      u::::u    u::::u r:::::::::::::::::r o:::::::::::::::or:::::::::::::::::r aaaaaaaaa:::::a \n")
-            Cheat.Print("        A:::::A   A:::::A     u::::u    u::::u rr::::::rrrrr::::::ro:::::ooooo:::::orr::::::rrrrr::::::r         a::::a \n")
-            Cheat.Print("       A:::::A     A:::::A    u::::u    u::::u  r:::::r     r:::::ro::::o     o::::o r:::::r     r:::::r  aaaaaaa:::::a \n")
-            Cheat.Print("      A:::::AAAAAAAAA:::::A   u::::u    u::::u  r:::::r     rrrrrrro::::o     o::::o r:::::r     rrrrrrraa::::::::::::a \n")
-            Cheat.Print("     A:::::::::::::::::::::A  u::::u    u::::u  r:::::r            o::::o     o::::o r:::::r           a::::aaaa::::::a \n")
-            Cheat.Print("    A:::::AAAAAAAAAAAAA:::::A u:::::uuuu:::::u  r:::::r            o::::o     o::::o r:::::r          a::::a    a:::::a \n")
-            Cheat.Print("   A:::::A             A:::::Au:::::::::::::::uur:::::r            o:::::ooooo:::::o r:::::r          a::::a    a:::::a \n")
-            Cheat.Print("  A:::::A               A:::::Au:::::::::::::::ur:::::r            o:::::::::::::::o r:::::r          a:::::aaaa::::::a \n")
-            Cheat.Print(" A:::::A                 A:::::Auu::::::::uu:::ur:::::r             oo:::::::::::oo  r:::::r           a::::::::::aa:::a\n")
-            Cheat.Print("AAAAAAA                   AAAAAAA uuuuuuuu  uuuurrrrrrr               ooooooooooo    rrrrrrr            aaaaaaaaaa  aaaa\n")
-        } else if (Variation == 7) {
-            Cheat.Print("     _                             \n")
-            Cheat.Print("    / \\  _   _ _ __ ___  _ __ __ _ \n")
-            Cheat.Print("   / _ \\| | | | '__/ _ \\| '__/ _` |\n")
-            Cheat.Print("  / ___ \\ |_| | | | (_) | | | (_| |\n")
-            Cheat.Print(" /_/   \\_\\__,_|_|  \\___/|_|  \\__,_|\n")
-        } else {
-            Cheat.Print("      _____                                     \n")
-            Cheat.Print("     /  _  \\  __ _________  ________________    \n")
-            Cheat.Print("    /  /_\\  \\|  |  \\_  __ \\/  _ \\_  __ \\__  \\  \n")
-            Cheat.Print("   /    |    \\  |  /|  | \\(  <_> )  | \\// __ \\_ \n")
-            Cheat.Print("   \\____|__  /____/ |__|   \\____/|__|  (____  / \n")
-            Cheat.Print("           \\/                               \\/  \n")
-        }
+    if (Variation == 1) {
+        Cheat.Print("      _____                                     \n")
+        Cheat.Print("     /  _  \\  __ _________  ________________    \n")
+        Cheat.Print("    /  /_\\  \\|  |  \\_  __ \\/  _ \\_  __ \\__  \\  \n")
+        Cheat.Print("   /    |    \\  |  /|  | \\(  <_> )  | \\// __ \\_ \n")
+        Cheat.Print("   \\____|__  /____/ |__|   \\____/|__|  (____  / \n")
+        Cheat.Print("           \\/                               \\/  \n")
+    } else if (Variation == 2) {
+        Cheat.Print("  /$$$$$$                                                   \n")
+        Cheat.Print(" /$$__  $$                                                  \n")
+        Cheat.Print("| $$  \\ $$ /$$   /$$  /$$$$$$   /$$$$$$   /$$$$$$   /$$$$$$ \n")
+        Cheat.Print("| $$$$$$$$| $$  | $$ /$$__  $$ /$$__  $$ /$$__  $$ |____  $$\n")
+        Cheat.Print("| $$__  $$| $$  | $$| $$  \\__/| $$  \\ $$| $$  \\__/  /$$$$$$$\n")
+        Cheat.Print("| $$  | $$| $$  | $$| $$      | $$  | $$| $$       /$$__  $$\n")
+        Cheat.Print("| $$  | $$|  $$$$$$/| $$      |  $$$$$$/| $$      |  $$$$$$$\n")
+        Cheat.Print("|__/  |__/ \\______/ |__/       \\______/ |__/       \\_______/\n")
+    } else if (Variation == 3) {
+        Cheat.Print("      _/_/                                                                      \n")
+        Cheat.Print("   _/    _/     _/    _/      _/  _/_/       _/_/       _/  _/_/       _/_/_/   \n")
+        Cheat.Print("  _/_/_/_/     _/    _/      _/_/         _/    _/     _/_/         _/    _/    \n")
+        Cheat.Print(" _/    _/     _/    _/      _/           _/    _/     _/           _/    _/     \n")
+        Cheat.Print("_/    _/       _/_/_/      _/             _/_/       _/             _/_/_/      \n")
+    } else if (Variation == 4) {
+        Cheat.Print(" ______     __  __     ______     ______     ______     ______    \n")
+        Cheat.Print("/\\  __ \\   /\\ \\/\\ \\   /\\  == \\   /\\  __ \\   /\\  == \\   /\\  __ \\   \n")
+        Cheat.Print("\\ \\  __ \\  \\ \\ \\_\\ \\  \\ \\  __<   \\ \\ \\/\\ \\  \\ \\  __<   \\ \\  __ \\  \n")
+        Cheat.Print(" \\ \\_\\ \\_\\  \\ \\_____\\  \\ \\_\\ \\_\\  \\ \\_____\\  \\ \\_\\ \\_\\  \\ \\_\\ \\_\\ \n")
+        Cheat.Print("  \\/_/\\/_/   \\/_____/   \\/_/ /_/   \\/_____/   \\/_/ /_/   \\/_/\\/_/ \n")
+    } else if (Variation == 5) {
+        Cheat.Print("    ___                                        \n")
+        Cheat.Print("   /   |  __  __   _____  ____    _____  ____ _\n")
+        Cheat.Print("  / /| | / / / /  / ___/ / __ \\  / ___/ / __ `/\n")
+        Cheat.Print(" / ___ |/ /_/ /  / /    / /_/ / / /    / /_/ / \n")
+        Cheat.Print("/_/  |_|\\__,_/  /_/     \\____/ /_/     \\__,_/  \n")
+    } else if (Variation == 6) {
+        Cheat.Print("               AAA                                                                                                      \n")
+        Cheat.Print("              A:::A                                                                                                     \n")
+        Cheat.Print("             A:::::A                                                                                                    \n")
+        Cheat.Print("            A:::::::A                                                                                                   \n")
+        Cheat.Print("           A:::::::::A        uuuuuu    uuuuuu rrrrr   rrrrrrrrr      ooooooooooo   rrrrr   rrrrrrrrr   aaaaaaaaaaaaa   \n")
+        Cheat.Print("          A:::::A:::::A       u::::u    u::::u r::::rrr:::::::::r   oo:::::::::::oo r::::rrr:::::::::r  a::::::::::::a  \n")
+        Cheat.Print("         A:::::A A:::::A      u::::u    u::::u r:::::::::::::::::r o:::::::::::::::or:::::::::::::::::r aaaaaaaaa:::::a \n")
+        Cheat.Print("        A:::::A   A:::::A     u::::u    u::::u rr::::::rrrrr::::::ro:::::ooooo:::::orr::::::rrrrr::::::r         a::::a \n")
+        Cheat.Print("       A:::::A     A:::::A    u::::u    u::::u  r:::::r     r:::::ro::::o     o::::o r:::::r     r:::::r  aaaaaaa:::::a \n")
+        Cheat.Print("      A:::::AAAAAAAAA:::::A   u::::u    u::::u  r:::::r     rrrrrrro::::o     o::::o r:::::r     rrrrrrraa::::::::::::a \n")
+        Cheat.Print("     A:::::::::::::::::::::A  u::::u    u::::u  r:::::r            o::::o     o::::o r:::::r           a::::aaaa::::::a \n")
+        Cheat.Print("    A:::::AAAAAAAAAAAAA:::::A u:::::uuuu:::::u  r:::::r            o::::o     o::::o r:::::r          a::::a    a:::::a \n")
+        Cheat.Print("   A:::::A             A:::::Au:::::::::::::::uur:::::r            o:::::ooooo:::::o r:::::r          a::::a    a:::::a \n")
+        Cheat.Print("  A:::::A               A:::::Au:::::::::::::::ur:::::r            o:::::::::::::::o r:::::r          a:::::aaaa::::::a \n")
+        Cheat.Print(" A:::::A                 A:::::Auu::::::::uu:::ur:::::r             oo:::::::::::oo  r:::::r           a::::::::::aa:::a\n")
+        Cheat.Print("AAAAAAA                   AAAAAAA uuuuuuuu  uuuurrrrrrr               ooooooooooo    rrrrrrr            aaaaaaaaaa  aaaa\n")
+    } else if (Variation == 7) {
+        Cheat.Print("     _                             \n")
+        Cheat.Print("    / \\  _   _ _ __ ___  _ __ __ _ \n")
+        Cheat.Print("   / _ \\| | | | '__/ _ \\| '__/ _` |\n")
+        Cheat.Print("  / ___ \\ |_| | | | (_) | | | (_| |\n")
+        Cheat.Print(" /_/   \\_\\__,_|_|  \\___/|_|  \\__,_|\n")
+    } else {
+        Cheat.Print("      _____                                     \n")
+        Cheat.Print("     /  _  \\  __ _________  ________________    \n")
+        Cheat.Print("    /  /_\\  \\|  |  \\_  __ \\/  _ \\_  __ \\__  \\  \n")
+        Cheat.Print("   /    |    \\  |  /|  | \\(  <_> )  | \\// __ \\_ \n")
+        Cheat.Print("   \\____|__  /____/ |__|   \\____/|__|  (____  / \n")
+        Cheat.Print("           \\/                               \\/  \n")
+    }
 }
 Onstartup();
-
-// END AROOOOORA
-//Souljah look good or no?
