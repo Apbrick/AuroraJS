@@ -1,13 +1,10 @@
-//UPDATES for V1.2:
-// Reworked Anti-Brute
-// Fixed watermark displaying while in main menu
-// Added Recharge on swap
-// Added Rainbow Border
-// Added Fish esp
-// Added Chicken esp
+// V2 Updates
+// Added Rage tab
+// Changed how boxes look
 
 debugbuild = Cheat.GetUsername() == "Apbrick" || Cheat.GetUsername() == "geinibba3413" || Cheat.GetUsername() == "Heneston";
 betabuild = Cheat.GetUsername() == "Brexan" || Cheat.GetUsername() == "avatar" || Cheat.GetUsername() == "Zapzter" || Cheat.GetUsername() == "xyren";
+
 
 //=======================================================================================================
 //
@@ -66,7 +63,7 @@ const menu = {
     // current groupbox data
     // used for automatic spacing
     curr_groupbox: {
-        x: 0,
+        x: 55,
         y: 0,
         w: 0,
         h: 0,
@@ -75,8 +72,8 @@ const menu = {
 
     x: 140,
     y: 140,
-    w: 400,
-    h: 300,
+    w: 800,
+    h: 500,
 
     // whether or not the user was clicking
     // used to fix hotkey input
@@ -113,6 +110,17 @@ const container = {
 
 const config_system = {};
 const config = {
+    inairoptions: checkbox_t(),
+    inair_weapons: dropdown_t(),
+    awp_inair: slider_t(),
+    r8_inair: slider_t(),
+    scout_inair: slider_t(),
+    smg_inair: slider_t(),
+    delayshot: checkbox_t(),
+    noscope: checkbox_t(),
+    noscopedistance: slider_t(),
+    avoid_hitboxes: dropdown_t(),
+    forcesafety: dropdown_t(),
     aa_modes: dropdown_t(),
     e_peek: hotkey_t(0x0, hotkey_mode_t.HOLD, true),
     low_delta_slowwalk: checkbox_t(),
@@ -121,6 +129,8 @@ const config = {
     Aurora_doubletap: dropdown_t(),
     fast_recharge: checkbox_t(),
     weapon_swap_recharge: checkbox_t(),
+    mindmgdt: checkbox_t(),
+    mindmgdt_hp: slider_t(),
     advanced_fakelag: dropdown_t(),
     FLonRoundEnd: checkbox_t(),
     fake_lag_min: slider_t(),
@@ -131,14 +141,15 @@ const config = {
     aspect_ratio_slider: slider_t(),
     healthshot_effect: checkbox_t(),
     healthshot_effect_strongness: slider_t(),
-    healthshot_color: color_picker_t(255, 255, 255, 255),
+    healthshot_color: color_picker_t(213, 78, 92, 255),
     rainbow_bar: checkbox_t(),
+    rainbow_fullscreen: checkbox_t(),
     rainbow_bar_speed: slider_t(),
     customesp: dropdown_t(),
     clantag: dropdown_t(),
     hide_chat: checkbox_t(),
-    hide_vc: checkbox_t(),
     menu_color: color_picker_t(213, 78, 92, 255),
+    rainbowmenu: checkbox_t(),
     menu_hotkey: hotkey_t(0x24, hotkey_mode_t.TOGGLE, true),
     hotkey_x: slider_t(),
     hotkey_y: slider_t(),
@@ -313,10 +324,11 @@ menu.slider( "float", "test_float", 8, 16, 0.25, true)
 menu.combobox( "test_combobox", [ "a", "b", "c" ], "test_combobox" );
 menu.multibox( "test_multicombo", [ "1", "2", "3" ], "test_combobox2" );
 */
+
 menu.render = function () {
 
     // update variables
-    menu.font = Render.GetFont("Tahoma.ttf", 12, true);
+    menu.font = Render.GetFont("verdana.ttf", 12, true);
     menu.open = config.menu_hotkey[3];
 
     cursor.x = Input.GetCursorPosition()[0], cursor.y = Input.GetCursorPosition()[1];
@@ -337,20 +349,22 @@ menu.render = function () {
 
     const topaccent = menu.get_color(config.menu_color)
     // render the box above menu's body
-    menu.body(menu.x, menu.y - 3, menu.w, 10, [topaccent[0], topaccent[1], topaccent[2], 255], [topaccent[0], topaccent[1], topaccent[2], 255], [topaccent[0], topaccent[1], topaccent[2], 255], "Aurora | " + Cheat.GetUsername());
+    menu.topbar(menu.x, menu.y - 3, menu.w, 10, [topaccent[0], topaccent[1], topaccent[2], 255], [topaccent[0], topaccent[1], topaccent[2], 255], [topaccent[0], topaccent[1], topaccent[2], 255], "Aurora | " + Cheat.GetUsername());
     // render the menu's body
-    menu.body(menu.x, menu.y, menu.w, menu.h, [36, 36, 36, 255], [25, 25, 25, 255], [36, 36, 36, 255], "Aurora | " + Cheat.GetUsername());
+    menu.body(menu.x, menu.y, menu.w, menu.h, [36, 36, 36, 255], [25, 25, 25, 255], [36, 36, 36, 255], "Aurora");
+    menu.body(menu.x, menu.y + 500, menu.w, 5, [36, 36, 36, 255], [25, 25, 25, 255], [36, 36, 36, 255], "buyaurora.today");
+    menu.body(menu.x + 730, menu.y + 500, 30, 5, [36, 36, 36, 255], [25, 25, 25, 255], [36, 36, 36, 255], Cheat.GetUsername());
+
 
     // tabs groupbox
-    menu.groupbox(menu.x + 5, menu.y + 35, 100, 260, "tabs", false); {
+    menu.groupbox(menu.x + 5, menu.y + 35, 100, 460, "tabs", false); {
         // render tabs
-        menu.tab("AA Settings", 1, false, [])
-        menu.tab("AA Misc", 2, false, [])
-        menu.tab("DT Settings", 3, false, [])
-        menu.tab("Fakelag Settings", 4, false, [])
+        menu.tab("Rage", 1, false, [])
+        menu.tab("Anti-Aim", 2, false, [])
+        menu.tab("Double Tap", 3, false, [])
+        menu.tab("Fakelag", 4, false, [])
         menu.tab("Visuals", 5, false, [])
         menu.tab("Misc", 6, false, [])
-
     }
 
     // switch between tabs
@@ -359,11 +373,11 @@ menu.render = function () {
             switch (menu.curr_subtab["tab 0"]) {
                 // first subtab
                 case 0:
-                    menu.groupbox(menu.x + 110, menu.y + 35, 285, 260, "groupbox 3", false); {
+                    menu.groupbox(menu.x + 110, menu.y + 35, 685, 460, "groupbox 3", false); {
                         Render.String(menu.x + 120, menu.y + 65, 0, "Welcome to Aurora " + Cheat.GetUsername(), [255, 255, 255, 205], menu.font)
                         Render.String(menu.x + 120, menu.y + 78, 0, "Join our discord for support", [255, 255, 255, 205], menu.font)
                         Render.String(menu.x + 120, menu.y + 91, 0, "discord.buyaurora.today", [255, 255, 255, 205], menu.font)
-                        Render.String(menu.x + 120, menu.y + 104, 0, "Current version: V 1.2", [255, 255, 255, 205], menu.font)
+                        Render.String(menu.x + 120, menu.y + 104, 0, "Current version: V 2.0", [255, 255, 255, 205], menu.font)
                         menu.button("Load config", config_system.load);
                     }
                     break;
@@ -375,14 +389,41 @@ menu.render = function () {
             switch (menu.curr_subtab["tab 1"]) {
                 // first subtab
                 case 0:
-                    menu.groupbox(menu.x + 110, menu.y + 35, 285, 260, "groupbox", false); {
-                        menu.combobox("Modes", ["None", "Simple", "Advanced", "Aurora", "Anti-Brute"], "aa_modes");
-                        menu.hotkey("E-Peek", "e_peek");
+                    menu.groupbox(menu.x + 110, menu.y + 35, 340, 460, "groupbox 3", false); {
+                        menu.multibox("Avoid unsafe hitboxes", ["Head", "Chest", "Arms", "Stomach", "Legs", "Feet"], "avoid_hitboxes");
+                        menu.multibox("Force safety on hitbox", ["Head", "Chest", "Arms", "Stomach", "Legs", "Feet"], "forcesafety");
+                        menu.checkbox("In air options", "inairoptions")
+                        function inair() {
+                            if (config.inairoptions.value) {
+                                var inairweapons = config.inair_weapons.value
+                                menu.multibox("Weapons", ["AWP", "R8 Revolver", "SSG08", "SMG"], "inair_weapons");
+                                if (inairweapons & (1 << 0)) {
+                                    menu.slider("   AWP Hitchance", "awp_inair", -1, 101, 1, false)
+                                }
+                                if (inairweapons & (1 << 1)) {
+                                    menu.slider("   R8 Hitchance", "r8_inair", -1, 101, 1, false)
+                                }
+                                if (inairweapons & (1 << 2)) {
+                                    menu.slider("   SSG Hitchance", "scout_inair", -1, 101, 1, false)
+                                }
+                                if (inairweapons & (1 << 3)) {
+                                    menu.slider("   SMG Hitchance", "smg_inair", -1, 101, 1, false)
+                                }
+                            }
+                        }
+                        inair()
+                    }
+                    menu.groupbox(menu.x + 450, menu.y + 35, 340, 460, "groupbox 4", false); {
+                        menu.checkbox("Delay shot", "delayshot")
+                        menu.checkbox("No-scope Distance", "noscope")
+                        function noscope() {
+                            if (config.noscope.value) {
+                                menu.slider("   Max distance", "noscopedistance", 0, 21, 1, false)
+                            }
+                        }
+                        noscope()
                     }
                     break;
-
-                // second subtab
-                case 1:
             }
             break;
 
@@ -392,7 +433,13 @@ menu.render = function () {
             switch (menu.curr_subtab["tab 2"]) {
                 // first subtab
                 case 0:
-                    menu.groupbox(menu.x + 110, menu.y + 35, 285, 260, "groupbox 3", false); {
+                    menu.groupbox(menu.x + 110, menu.y + 35, 340, 460, "groupbox 3", false); {
+                        menu.combobox("Modes", ["None", "Simple", "Advanced", "Aurora", "Anti-Brute"], "aa_modes");
+                        menu.hotkey("E-Peek", "e_peek");
+
+                    }
+
+                    menu.groupbox(menu.x + 450, menu.y + 35, 340, 460, "groupbox 4", false); {
                         menu.checkbox("Slowwalk AA", "low_delta_slowwalk");
                         function slowwalkspeed() {
                             if (config.low_delta_slowwalk.value) {
@@ -410,15 +457,22 @@ menu.render = function () {
             switch (menu.curr_subtab["tab 3"]) {
                 // first subtab
                 case 0:
-                    menu.groupbox(menu.x + 110, menu.y + 35, 285, 260, "groupbox 3", false); {
+                    menu.groupbox(menu.x + 110, menu.y + 35, 340, 460, "groupbox 3", false); {
                         menu.combobox("Aurora Doubletap", ["None", "Fast", "Quick", "Supersonic"], "Aurora_doubletap");
                         function dtshow() {
                             if (config.Aurora_doubletap.value == 1 || config.Aurora_doubletap.value == 2 || config.Aurora_doubletap.value == 3) {
                                 menu.checkbox("Fast Recharge", "fast_recharge");
                                 menu.checkbox("Recharge on swap", "weapon_swap_recharge");
+                                menu.checkbox("HP / 2", "mindmgdt")
+                                if (config.mindmgdt.value) {
+                                    menu.slider("   Minimum HP", "mindmgdt_hp", 0, 101, 1, false)
+                                }
                             }
                         }
                         dtshow();
+                    }
+                    menu.groupbox(menu.x + 450, menu.y + 35, 340, 460, "groupbox 4", false); {
+
                     }
                     break;
             }
@@ -428,14 +482,17 @@ menu.render = function () {
             switch (menu.curr_subtab["tab 4"]) {
                 // first subtab
                 case 0:
-                    menu.groupbox(menu.x + 110, menu.y + 35, 285, 260, "groupbox 3", false); {
-                        menu.combobox("Advanced Fakelag", ["None", "Aurora", "Ideal Tick"], "advanced_fakelag");
+                    menu.groupbox(menu.x + 110, menu.y + 35, 340, 460, "groupbox 3", false); {
+                        menu.combobox("Advanced Fakelag", ["None", "Aurora", "Ideal Tick", "Fluctuate"], "advanced_fakelag");
                         function FLroundend() {
                             if (config.advanced_fakelag.value == 1 || config.advanced_fakelag.value == 2) {
                                 menu.checkbox("Disable on round end", "FLonRoundEnd")
                             }
                         }
                         FLroundend();
+
+                    }
+                    menu.groupbox(menu.x + 450, menu.y + 35, 340, 460, "groupbox 4", false); {
 
                     }
                     break;
@@ -446,8 +503,8 @@ menu.render = function () {
             switch (menu.curr_subtab["tab 5"]) {
                 // first subtab
                 case 0:
-                    menu.groupbox(menu.x + 110, menu.y + 35, 285, 260, "groupbox 3", false); {
-                        menu.multibox("Indicators", ["Anti-Aim Mode", "Doubletap", "Advanced Fakelag"], "indicators");
+                    menu.groupbox(menu.x + 110, menu.y + 35, 340, 460, "groupbox 3", false); {
+                        menu.multibox("Indicators", ["Anti-Aim Side", "Anti-Aim Mode", "Doubletap", "Advanced Fakelag"], "indicators");
                         menu.checkbox("Hotkey List", "hotkey_list")
                         menu.checkbox("Aspect Ratio", "aspect_ratio")
                         function aspslider() {
@@ -459,7 +516,7 @@ menu.render = function () {
                         menu.checkbox("Kill Effect", "healthshot_effect")
                         function healthslider() {
                             if (config.healthshot_effect.value) {
-                                menu.slider("   Strenght", "healthshot_effect_strongness", 0, 4, 0.1, true)
+                                menu.slider("Speed", "healthshot_effect_strongness", 0, 4, 0.1, true)
                                 menu.color_picker("   Color", "healthshot_color", false)
                             }
                         }
@@ -467,11 +524,15 @@ menu.render = function () {
                         menu.checkbox("Rainbow Bar", "rainbow_bar")
                         function rainbowbar() {
                             if (config.rainbow_bar.value) {
-                                menu.slider("   Speed", "rainbow_bar_speed", 0.01, 1, 0.01, true)
+                                menu.checkbox("   Fullscreen", "rainbow_fullscreen")
+                                menu.slider("   Speed", "rainbow_bar_speed", 1, 10, 1, false)
                             }
                         }
                         rainbowbar();
-                        menu.multibox("MISC. ESP", ["Fish ESP", "Chicken ESP"], "customesp")
+                        menu.multibox("Misc. esp", ["Fish esp", "Chicken esp"], "customesp")
+                    }
+                    menu.groupbox(menu.x + 450, menu.y + 35, 340, 460, "groupbox 4", false); {
+
                     }
                     break;
             }
@@ -481,22 +542,19 @@ menu.render = function () {
             switch (menu.curr_subtab["tab 6"]) {
                 // first subtab
                 case 0:
-                    menu.groupbox(menu.x + 110, menu.y + 35, 285, 260, "groupbox 3", false); {
+                    menu.groupbox(menu.x + 110, menu.y + 35, 340, 460, "groupbox 3", false); {
                         menu.button("Join Server", join_server.click);
                         menu.combobox("Clantag", ["Off", "Static", "Fancy"], "clantag");
                         menu.checkbox("Hide Chat", "hide_chat")
-                        function hidevoice() {
-                            if (config.hide_chat.value) {
-                                menu.checkbox("Disable Voice Chat", "hide_vc")
-                            }
-                        }
-                        hidevoice();
+                    }
+                    menu.groupbox(menu.x + 450, menu.y + 35, 340, 460, "groupbox 4", false); {
                         menu.hotkey("Menu hotkey", "menu_hotkey");
                         menu.color_picker("Menu color", "menu_color", false)
+                        menu.checkbox("Rainbow menu", "rainbowmenu")
                         menu.button("Save config", config_system.save);
                         menu.button("Load config", config_system.load);
                     }
-                    break; xZ
+                    break;
             }
             break;
         case 7:
@@ -543,6 +601,34 @@ menu.body = function (x, y, w, h, bg, header_text, header_line, name) {
     Render.FilledRect(x, y, w, 30, header_text)
     Render.FilledRect(x, y + 30, w, 2, header_line)
     Render.String(x + 10, y + 8, 0, name, [255, 255, 255, 205], menu.font)
+}
+
+menu.topbar = function (x, y, w, h, bg, header_text, header_line, name) {
+    // disable dragging if mouse1 isn't pressed
+    if (!input_system.is_key_down(0x01))
+        cursor.dragging = false;
+
+    // check if we're dragging the window
+    if (input_system.is_key_down(0x01) && input_system.cursor_in_bounds(x, y, w, 30) || cursor.dragging) {
+        // update dragging state
+        cursor.dragging = true;
+
+        // update menu position
+        menu.x = cursor.x - cursor.delta_x;
+        menu.y = cursor.y - cursor.delta_y;
+    }
+
+    else {
+        // update cursor-menu delta
+        cursor.delta_x = cursor.x - menu.x;
+        cursor.delta_y = cursor.y - menu.y;
+    }
+
+    // render menu's body
+    Render.FilledRect(x, y, w, h, bg)
+    Render.FilledRect(x, y, w, h - 7, header_text)
+    Render.FilledRect(x, y, w, h - 7, header_line)
+    Render.String(x + 10, y, 0, name, [255, 255, 255, 205], menu.font)
 }
 
 menu.groupbox = function (x, y, w, h, string, show_name) {
@@ -645,7 +731,7 @@ menu.checkbox = function (string, variable) {
 
 menu.slider = function (string, variable, min_value, max_value, step, float) {
     // when u add a slider it automatically places based on these
-    var x = menu.curr_groupbox.x + 10, y = menu.curr_groupbox.y + menu.curr_groupbox.offset + 10;
+    var x = menu.curr_groupbox.x + 65, y = menu.curr_groupbox.y + menu.curr_groupbox.offset + 10;
     var position = menu.curr_groupbox.x + menu.curr_groupbox.w - 135;
     var w = 125, h = 8;
 
@@ -853,8 +939,8 @@ menu.hotkey = function (string, variable) {
 
 menu.button = function (variable, callback) {
     // when u add a button it automatically places based on these
-    var x = menu.curr_groupbox.x + 10, y = menu.curr_groupbox.y + menu.curr_groupbox.offset + 10;
-    const w = 75, h = 15;
+    var x = menu.curr_groupbox.x + 10, y = menu.curr_groupbox.y + menu.curr_groupbox.offset + 13;
+    const w = 75, h = 18;
 
     // is mouse 1 being held in the tabs width and height
     if (input_system.cursor_in_bounds(x, y, w, h) && input_system.is_key_pressed(0x01)) {
@@ -1262,37 +1348,176 @@ var key_names = ["-", "mouse1", "mouse2", "break", "mouse3", "mouse4", "mouse5",
     "-", "-", "-", "-", "-", "-", "-", "-", "-",
     "-", "-"];
 
-Cheat.RegisterCallback("Draw", "on_paint")
-Cheat.RegisterCallback("CreateMove", "on_cmove")
-Cheat.RegisterCallback("Unload", "on_unload")
 
-
-//=======================================================================================================
-//
-//
-// GUI ENDS HERE
-//
-// 
-//=======================================================================================================
-
-function GetMathRandom(min, max) {
+function getDropdownValue(Clvs6anps2, F9trm78mwl) {
+    var H6tzwk68kz = 1 << F9trm78mwl;
+    return Clvs6anps2 & H6tzwk68kz ? true : false;
+}
+function getMathRandom(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max) + 1;
     return Math.floor(Math.random() * (max - min)) + min;
 }
 
-function getDropdownValue(value, index) {
-    var mask = 1 << index;
-    return value & mask ? true : false;
+function getVelocity(index) {
+    var velocity = Entity.GetProp(index, "CBasePlayer", "m_vecVelocity[0]");
+    return Math.sqrt(velocity[0] * velocity[0] + velocity[1] * velocity[1]);
 }
 
+
+
+// GLOBAL VARS
+
+//Weapons by Sapphire
+var wep2tab = {
+    "usp s": "USP", "glock 18": "Glock", "dual berettas": "Dualies", "r8 revolver": "Revolver", "desert eagle": "Deagle", "p250": "P250", "tec 9": "Tec-9",
+    "mp9": "MP9", "mac 10": "Mac10", "pp bizon": "PP-Bizon", "ump 45": "UMP45", "ak 47": "AK47", "sg 553": "SG553", "aug": "AUG", "m4a1 s": "M4A1-S", "m4a4": "M4A4", "ssg 08": "SSG08",
+    "awp": "AWP", "g3sg1": "G3SG1", "scar 20": "SCAR20", "xm1014": "XM1014", "mag 7": "MAG7", "m249": "M249", "negev": "Negev", "p2000": "General", "famas": "FAMAS", "five seven": "Five Seven", "mp7": "MP7",
+    "ump 45": "UMP45", "p90": "P90", "cz75 auto": "CZ-75", "mp5 sd": "MP5", "galil ar": "GALIL", "sawed off": "Sawed off"
+};
+var tab_names = ["General", "USP", "Glock", "Five Seven", "Tec-9", "Deagle", "Revolver", "Dualies", "P250", "CZ-75", "Mac10", "P90", "MP5", "MP7", "MP9", "UMP45", "PP-Bizon", "M4A1-S", "M4A4", "AK47", "AUG", "SG553", "FAMAS", "GALIL", "AWP", "SSG08", "SCAR20", "G3SG1", "M249", "XM1014", "MAG7", "Negev", "Sawed off"];
+
+// Avoid unsafe Hitboxes
+function onAvoidHitboxes() {
+    var local = Entity.GetLocalPlayer()
+    var weapon = Entity.GetWeapon(local)
+    var name = Entity.GetName(weapon)
+    var avoidhitboxes = config.avoid_hitboxes.value;
+    var players = Entity.GetEnemies()
+    players.forEach(function (player) {
+        if (avoidhitboxes & (1 << 0)) {
+            Ragebot.IgnoreTargetHitbox(player, 0);
+            Ragebot.IgnoreTargetHitbox(player, 1);
+        }
+        if (avoidhitboxes & (1 << 1)) {
+            Ragebot.IgnoreTargetHitbox(player, 5);
+        }
+        if (avoidhitboxes & (1 << 2)) {
+            Ragebot.IgnoreTargetHitbox(player, 6);
+        }
+        if (avoidhitboxes & (1 << 3)) {
+            Ragebot.IgnoreTargetHitbox(player, 2);
+            Ragebot.IgnoreTargetHitbox(player, 3);
+            Ragebot.IgnoreTargetHitbox(player, 4);
+        }
+        if (avoidhitboxes & (1 << 4)) {
+            Ragebot.IgnoreTargetHitbox(player, 7);
+            Ragebot.IgnoreTargetHitbox(player, 8);
+            Ragebot.IgnoreTargetHitbox(player, 9);
+            Ragebot.IgnoreTargetHitbox(player, 10);
+        }
+        if (avoidhitboxes & (1 << 5)) {
+            Ragebot.IgnoreTargetHitbox(player, 11);
+            Ragebot.IgnoreTargetHitbox(player, 12);
+        }
+    })
+}
+
+//Avoid unsafe Hitboxes
+
+// Forcesafety
+function onForceSafety() {
+    var local = Entity.GetLocalPlayer()
+    var weapon = Entity.GetWeapon(local)
+    var name = Entity.GetName(weapon)
+    var forcesafety = config.forcesafety.value;
+    var players = Entity.GetEnemies()
+    players.forEach(function (player) {
+        if (getDropdownValue(forcesafety, 0)) {
+            Ragebot.ForceHitboxSafety(player, 0);
+            Ragebot.ForceHitboxSafety(player, 1);
+        }
+        if (getDropdownValue(forcesafety, 1)) {
+            Ragebot.ForceHitboxSafety(player, 5);
+        }
+        if (getDropdownValue(forcesafety, 2)) {
+            Ragebot.ForceHitboxSafety(player, 6);
+        }
+        if (getDropdownValue(forcesafety, 3)) {
+            Ragebot.ForceHitboxSafety(player, 2);
+            Ragebot.ForceHitboxSafety(player, 3);
+            Ragebot.ForceHitboxSafety(player, 4);
+        }
+        if (getDropdownValue(forcesafety, 4)) {
+            Ragebot.ForceHitboxSafety(player, 7);
+            Ragebot.ForceHitboxSafety(player, 8);
+            Ragebot.ForceHitboxSafety(player, 9);
+            Ragebot.ForceHitboxSafety(player, 10);
+        }
+        if (getDropdownValue(forcesafety, 5)) {
+            Ragebot.ForceHitboxSafety(player, 11);
+            Ragebot.ForceHitboxSafety(player, 12);
+        }
+    })
+}
+// Forcesafety
+
+// Delay shot
+var last_shot_time = [];
+function onPlayerAlive() {
+    if (!config.delayshot.value) return;
+    var local = Entity.GetLocalPlayer();
+    if (!Entity.IsAlive(local)) return;
+    var enemies = Entity.GetEnemies();
+    for (var i = 0; i < enemies.length; i++) {
+        var enemy = enemies[i];
+        var dif = Globals.Tickcount() - last_shot_time[enemy];
+        var has_shot = dif >= 0 && dif <= 12;
+        if (!has_shot) Ragebot.IgnoreTarget(enemy);
+    }
+}
+function onGetSooter() {
+    var shooter = Entity.GetEntityFromUserID(Event.GetInt("userid"));
+    last_shot_time[shooter] = Globals.Tickcount();
+}
+function onGetEntity() {
+    var entity = Entity.GetEntityFromUserID(Event.GetInt("userid"));
+    if (entity == Entity.GetLocalPlayer()) last_shot_time = [];
+}
+// Delayshot
+
+// In air hitchance
+function onHitchanceInAir() {
+    inAirHitchance = config.inair_weapons.value;
+    inAirOptions = config.inairoptions.value;
+
+    var localWeapon = Entity.GetName(Entity.GetWeapon(Entity.GetLocalPlayer()));
+    var flags = Entity.GetProp(Entity.GetLocalPlayer(), 'CBasePlayer', 'm_fFlags');
+
+    var awpHitchance = config.awp_inair.value;
+    if (getDropdownValue(inAirHitchance, 0) && inAirOptions) {
+        if (localWeapon == 'awp') {
+            !(flags & 1 << 0) && !(flags & 1 << 18) && (target = Ragebot.GetTarget(), Ragebot.ForceTargetHitchance(target, awpHitchance));
+        }
+    }
+
+    var scoutHitchance = config.scout_inair.value;
+    if (getDropdownValue(inAirHitchance, 1) && inAirOptions) {
+        if (localWeapon == 'ssg 08') {
+            !(flags & 1 << 0) && !(flags & 1 << 18) && (target = Ragebot.GetTarget(), Ragebot.ForceTargetHitchance(target, scoutHitchance));
+        }
+    }
+
+    var revolverHitchance = config.r8_inair.value;
+    if (getDropdownValue(inAirHitchance, 2) && inAirOptions) {
+        if (localWeapon == 'r8 revolver') {
+            !(flags & 1 << 0) && !(flags & 1 << 18) && (target = Ragebot.GetTarget(), Ragebot.ForceTargetHitchance(target, revolverHitchance));
+        }
+    }
+
+    var smgHitchance = config.smg_inair.value;
+    if (getDropdownValue(inAirHitchance, 3) && inAirOptions) {
+        if (localWeapon == 'mp9' || localWeapon == 'mac 10' || localWeapon == 'pp bizon' || localWeapon == 'ump 45' || localWeapon == 'mp7' || localWeapon == 'p90' || localWeapon == 'mp5 sd') {
+            !(flags & 1 << 0) && !(flags & 1 << 18) && (target = Ragebot.GetTarget(), Ragebot.ForceTargetHitchance(target, smgHitchance));
+        }
+    }
+}
+// In air hitchance
 /*       None     */
 function AuroraNone() {
     if (config.aa_modes.value & (1 << 0)) {
-        AntiAim.SetOverride(0);
     }
 }
-Cheat.RegisterCallback("CreateMove", "AuroraNone");
 
 /*  Simple Mode   */
 function AuroraSimple() {
@@ -1303,17 +1528,17 @@ function AuroraSimple() {
         UI.SetValue(["Rage", "Anti Aim", "General", "Key assignment", "Jitter"], 3);
         AntiAim.SetOverride(1);
         AntiAim.SetRealOffset(42);
-        AntiAim.SetFakeOffset(GetMathRandom(25, 32));
+        AntiAim.SetFakeOffset(getMathRandom(25, 32));
     }
 }
-Cheat.RegisterCallback("CreateMove", "AuroraSimple");
+
 
 /* Advanced Mode  */
 
 function AuroraAdvanced() {
-    var Aurora_AA_RealOffset = GetMathRandom(40, 48);
-    var Aurora_AA_Advanced_JITTER = GetMathRandom(2, 10);
-    var Aurora_AA_FakeOffset = GetMathRandom(25, 32);
+    var Aurora_AA_RealOffset = getMathRandom(40, 48);
+    var Aurora_AA_Advanced_JITTER = getMathRandom(2, 10);
+    var Aurora_AA_FakeOffset = getMathRandom(25, 32);
     if (config.aa_modes.value & (1 << 2)) {
         UI.SetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"], 2);
         UI.SetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"], Aurora_AA_Advanced_JITTER);
@@ -1324,7 +1549,7 @@ function AuroraAdvanced() {
         AntiAim.SetFakeOffset(Aurora_AA_FakeOffset);
     }
 }
-Cheat.RegisterCallback("CreateMove", "AuroraAdvanced");
+
 
 /* Aurora Mode  */
 function AuroraMode() {
@@ -1332,16 +1557,16 @@ function AuroraMode() {
     if (Auroramode && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "AA Direction inverter"]) || UI.GetValue(["Legit", "General", "General", "Key assignment", "AA Direction inverter"])) {
         AntiAim.SetOverride(1)
         AntiAim.SetFakeOffset(Globals.Tickcount() % 4, 5 * 1 ? 3 : 3);
-        AntiAim.SetRealOffset(GetMathRandom(35, 25))
+        AntiAim.SetRealOffset(getMathRandom(35, 25))
         AntiAim.SetLBYOffset(-10)
     } else if (!UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "AA Direction inverter"]) || UI.GetValue(["Legit", "General", "General", "Key assignment", "AA Direction inverter"]) && Auroramode) {
         AntiAim.SetOverride(1)
         AntiAim.SetFakeOffset(Globals.Tickcount() % 4, 5 * 1 ? 5 : 5);
-        AntiAim.SetRealOffset(GetMathRandom(-35, -25))
+        AntiAim.SetRealOffset(getMathRandom(-35, -25))
         AntiAim.SetLBYOffset(9)
     }
 }
-Cheat.RegisterCallback("CreateMove", "AuroraMode");
+
 
 //Anti-Brute mode
 
@@ -1513,8 +1738,7 @@ function OnBulletImpact() {
     }
 }
 
-Cheat.RegisterCallback("player_hurt", "OnHurt");
-Cheat.RegisterCallback("bullet_impact", "OnBulletImpact");
+
 
 // E Peek
 
@@ -1539,12 +1763,12 @@ function KratoEPeek() {
     if (!planted) {
         onReset()
     }
-    var Aurora_AA_EPeek_YAW = GetMathRandom(168, 174);
+
     if (!currently_defusing && !picking_hostage && config.e_peek.active) {
         AntiAim.SetOverride(1);
         UI.SetValue(["Config", "Cheat", "General", "Restrictions"], 0);
         UI.SetValue(["Rage", "Anti Aim", "General", "Pitch mode"], 0);
-        UI.SetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"], Aurora_AA_EPeek_YAW);
+        UI.SetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"], getMathRandom(168, 174));
         UI.SetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"], 4);
         UI.SetValue(["Rage", "Anti Aim", "General", "Key assignment", "Jitter"], 3);
         UI.SetValue(["Rage", "Anti Aim", "Directions", "At targets"], 0);
@@ -1586,11 +1810,7 @@ function DefuseReset() {
     currently_picking_hostage = false;
 }
 
-Cheat.RegisterCallback("CreateMove", "KratoEPeek");
-Cheat.RegisterCallback("bomb_begindefuse", "Defusing");
-Cheat.RegisterCallback("round_start", "DefuseReset");
-Cheat.RegisterCallback("player_connect_full", "DefuseReset");
-Cheat.RegisterCallback("bomb_abortdefuse", "DefuseReset");
+
 
 //Lowdelta recode
 function lowdeltav2() {
@@ -1602,12 +1822,12 @@ function lowdeltav2() {
     if (config.low_delta_slowwalk.value && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "Slow walk"]) && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "AA Direction inverter"], "AA Inverter")) {
         AntiAim.SetOverride(1);
         UI.SetValue(["Rage", "Anti Aim", "Directions", "At targets"], 1);
-        AntiAim.SetFakeOffset(GetMathRandom(45, 55));
+        AntiAim.SetFakeOffset(getMathRandom(45, 55));
         AntiAim.SetRealOffset(-10);
     } else if (config.low_delta_slowwalk.value && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "Slow walk"]) && !UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "AA Direction inverter"], "AA Inverter")) {
         AntiAim.SetOverride(1);
         UI.SetValue(["Rage", "Anti Aim", "Directions", "At targets"], 1);
-        AntiAim.SetFakeOffset(GetMathRandom(-45, -55));
+        AntiAim.SetFakeOffset(getMathRandom(-45, -55));
         AntiAim.SetRealOffset(10);
     } else {
         AntiAim.SetOverride(0);
@@ -1619,7 +1839,7 @@ function lowdeltav2() {
     }
 }
 
-Cheat.RegisterCallback("CreateMove", "lowdeltav2");
+
 
 
 function slowwalkspeed() {
@@ -1640,12 +1860,12 @@ function slowwalkspeed() {
         UserCMD.SetMovement(movedirection);
     }
 }
-Cheat.RegisterCallback("CreateMove", "slowwalkspeed")
+
 
 //Leg Fucker
 function onShakingLegs() {
     if (config.leg_breaker.value) {
-        if (Globals.Tickcount() % GetMathRandom(4, 7) == 0) {
+        if (Globals.Tickcount() % getMathRandom(4, 7) == 0) {
             if (UI.GetValue(["Misc.", "Movement", "Leg movement"]) == 2) {
                 UI.SetValue(["Misc.", "Movement", "Leg movement"], 1);
             } else if (UI.GetValue(["Misc.", "Movement", "Leg movement"]) == 1) {
@@ -1656,19 +1876,30 @@ function onShakingLegs() {
         }
     }
 }
-Cheat.RegisterCallback("CreateMove", "onShakingLegs");
+
 // Advanced fakelag fully done
 function AuroraFakelag() {
     if (config.advanced_fakelag.value == 1) {
         UI.SetValue(["Rage", "Fake Lag", "General", "Enabled"], 1);
-        UI.SetValue(["Rage", "Fake Lag", "General", "Limit"], (GetMathRandom(9, 12)));
-        UI.SetValue(["Rage", "Fake Lag", "General", "Jitter"], (GetMathRandom(2, 8)));
-        UI.SetValue(["Rage", "Fake Lag", "General", "Trigger limit"], (GetMathRandom(12, 14)));
+        UI.SetValue(["Rage", "Fake Lag", "General", "Limit"], (getMathRandom(9, 12)));
+        UI.SetValue(["Rage", "Fake Lag", "General", "Jitter"], (getMathRandom(2, 8)));
+        UI.SetValue(["Rage", "Fake Lag", "General", "Trigger limit"], (getMathRandom(12, 14)));
     } else if (config.advanced_fakelag.value == 2) {
         UI.SetValue(["Rage", "Fake Lag", "General", "Enabled"], 1);
         UI.SetValue(["Rage", "Fake Lag", "General", "Limit"], Globals.Tickcount() % 2 ? 1.4 : 13);
         UI.SetValue(["Rage", "Fake Lag", "General", "Jitter"], (Globals.Tickcount() % 20 ? 14 : 13) + 12);
         UI.SetValue(["Rage", "Fake Lag", "General", "Trigger limit"], Globals.Tickcount() % 2 ? 1.2 : 14);
+    } else if (config.advanced_fakelag.value == 3) {
+        fluctuate = (getVelocity(Entity.GetLocalPlayer()) / 17)
+        if (fluctuate <= 3) {
+            UI.SetValue(["Rage", "Fake Lag", "General", "Enabled"], 1);
+            UI.SetValue(["Rage", "Fake Lag", "General", "Limit"], 3);
+        } else {
+            UI.SetValue(["Rage", "Fake Lag", "General", "Enabled"], 1);
+            UI.SetValue(["Rage", "Fake Lag", "General", "Limit"], fluctuate);
+        }
+        UI.SetValue(["Rage", "Fake Lag", "General", "Jitter"], (getMathRandom(12, 19)));
+        Cheat.Print(String(getVelocity(Entity.GetLocalPlayer()) + "\n"));
     }
 };
 function FLonRoundEnd() {
@@ -1692,10 +1923,6 @@ function KrFLDisable() {
 };
 
 
-Cheat.RegisterCallback("round_end", "FLonRoundEnd")
-Cheat.RegisterCallback("round_start", "FLonRoundStart")
-Cheat.RegisterCallback("CreateMove", "KrFLDisable");
-Cheat.RegisterCallback("CreateMove", "AuroraFakelag");
 
 //Misc
 
@@ -1757,9 +1984,6 @@ function FastRecharge() {
     } else shouldDisableRecharge && (Exploit.EnableRecharge(), shouldDisableRecharge = ![]);
 }
 
-Cheat.RegisterCallback("CreateMove", "AuroraDT");
-Cheat.RegisterCallback("Unload", "AuroraDT_UNLOAD");
-Cheat.RegisterCallback("CreateMove", "FastRecharge");
 
 
 //clantag -- Finished
@@ -1769,8 +1993,7 @@ var oldTick = Globals.Tickcount();
 var AuroraNL = ["/", "/\\", "A", "A|", "A|_", "A|_|", "Au", "Au|", "Au|‾", "Aur", "Aur0", "Auro", "Auro|", "Auro|‾", "Auror", "Auror/", "Auror/\\", "Aurora", "Aurora", "Auror", "Auro", "Aur", "Au", "A", "", "", ""];
 var AuroraStatic = "Aurora"
 const globaltime = Globals.Realtime();
-const delay = 0.1;
-
+const delay = 0.2;
 function AuroraClantag() {
     if (config.clantag.value & (3 << 1)) {
         if (Globals.Realtime() > globaltime + delay) {
@@ -1788,7 +2011,7 @@ function AuroraClantag() {
     }
 }
 
-Cheat.RegisterCallback("FRAME_START", "AuroraClantag");
+
 
 //Hotkey List
 var accent = menu.get_color(config.menu_color);
@@ -1881,8 +2104,7 @@ const hotkeyList = {
     }
 };
 
-var samp = ["Ragebot activation", "Resolver override", "Left direction", "Right direction", "Back direction", "Mouse direction", "AA Direction inverter", "Jitter", "Slow walk", "Edge jump",
-    "Thirdperson", "Zoom", "Freecam", "Thirdperson", "Disable Autowall", "Extended backtrack", "Disable autowall"];
+var samp = ["Ragebot activation", "Resolver override", "Left direction", "Right direction", "Back direction", "Mouse direction", "AA Direction inverter", "Jitter", "Slow walk", "Edge jump", "Thirdperson", "Zoom", "Freecam", "Thirdperson", "Disable Autowall", "Extended backtrack", "Disable autowall"];
 
 (function () {
     const addHotkeyToList = function (bindPath) {
@@ -1896,11 +2118,12 @@ var samp = ["Ragebot activation", "Resolver override", "Left direction", "Right 
         }
     };
 
-    addHotkeyToList(["Rage", "General", "SHEET_MGR", "General", "Key assignment"]);
-    addHotkeyToList(["Rage", "Exploits", "SHEET_MGR", "Key assignment"]);
-    addHotkeyToList(["Rage", "Anti Aim", "SHEET_MGR", "Key assignment"]);
-    addHotkeyToList(["Misc.", "Keys", "SHEET_MGR", "Key assignment"]);
-    addHotkeyToList(["Config", "Scripts", "SHEET_MGR", "Keys", "JS Keybinds"]);
+    addHotkeyToList(["Legit", "General", "General", "Key assignment"]);
+    addHotkeyToList(["Rage", "General", "General", "Key assignment"]);
+    addHotkeyToList(["Rage", "Exploits", "Key assignment"]);
+    addHotkeyToList(["Rage", "Anti Aim", "Key assignment"]);
+    addHotkeyToList(["Misc.", "Keys", "Key assignment"]);
+    addHotkeyToList(["Config", "Scripts", "Keys", "JS Keybinds"]);
 
     for (var i in samp) {
         hotkeyList[samp[i]] = undefined;
@@ -1986,7 +2209,7 @@ draggable.create_draggable(152, 18, (function (menuOpened) {
         }
     }
 }));
-Cheat.RegisterCallback("Draw", "AuroraHotkey");
+
 
 
 //Watermark --  Finished
@@ -2048,7 +2271,7 @@ function watermark() {
         }
     }
 }
-Cheat.RegisterCallback("Draw", "watermark");
+
 
 
 
@@ -2062,9 +2285,9 @@ function aaText() {
     } else if (config.aa_modes.value == 1) {
         returnVar = "Simple";
     } else if (config.aa_modes.value == 2) {
-        returnVar = "Advanced";
+        returnVar = "Advanced AA";
     } else if (config.aa_modes.value == 3) {
-        returnVar = "Aurora";
+        returnVar = "Aurora AA";
     } else if (config.aa_modes.value == 4) {
         returnVar = "Anti-Brute";
     }
@@ -2119,55 +2342,88 @@ function stText() {
 }
 
 function onIndicators() {
+    Render.ShadowString = function (x, y, a, l, c, f) {
+        // Get the minimum alpha.
+        const alpha = Math.min(c[3], 235);
+        Render.String(x - 1 + delta_size[0], y - 1, a, String(l), [0, 0, 0, 55], f);
+        Render.String(x - 1 + delta_size[0], y + 1, a, String(l), [0, 0, 0, 55], f);
+        Render.String(x + 1 + delta_size[0], y - 1, a, String(l), [0, 0, 0, 55], f);
+        Render.String(x + 1 + delta_size[0], y + 1, a, String(l), [0, 0, 0, 55], f);
+        Render.String(x + delta_size[0], y, a, String(l), c, f);
+    }
+    Render.ShadowCircle = function (x, y, r, c) {
+        // Get the minimum alpha.
+        const alpha = Math.min(c[3], 235);
+
+        Render.Circle(x + delta_size[0], y + 29, r, c)
+    }
     var aay = 25
     var dty = 35
     var fly = 45
     // y value for indicators
-    if (getDropdownValue(config.indicators.value, 0)) {
-        var aay = 25
-    } else if (getDropdownValue(config.indicators.value, 0) && (getDropdownValue(config.indicators.value, 1))) {
-        var aay = 25
-        var fly = 35
-    } else if (getDropdownValue(config.indicators.value, 0) && (getDropdownValue(config.indicators.value, 2))) {
-        var aay = 25
-        var dty = 35
-    }
-    else if (getDropdownValue(config.indicators.value, 1)) {
-        var dty = 25
+    if (getDropdownValue(config.indicators.value, 1)) {
+        var aay = 35
     } else if (getDropdownValue(config.indicators.value, 1) && (getDropdownValue(config.indicators.value, 2))) {
-        var fly = 25
-        var dty = 35
+        var aay = 35
+        var fly = 45
+    } else if (getDropdownValue(config.indicators.value, 1) && (getDropdownValue(config.indicators.value, 3))) {
+        var aay = 35
+        var dty = 45
     }
     else if (getDropdownValue(config.indicators.value, 2)) {
-        var fly = 25
-    } else if (getDropdownValue(config.indicators.value, 1) && getDropdownValue(config.indicators.value, 2) && getDropdownValue(config.indicators.value, 3)) {
-        var aay = 25
         var dty = 35
-        var fly = 45
+    } else if (getDropdownValue(config.indicators.value, 2) && (getDropdownValue(config.indicators.value, 3))) {
+        var fly = 35
+        var dty = 45
+    }
+    else if (getDropdownValue(config.indicators.value, 3)) {
+        var fly = 35
+    } else if (getDropdownValue(config.indicators.value, 2) && getDropdownValue(config.indicators.value, 3) && getDropdownValue(config.indicators.value, 4)) {
+        var aay = 35
+        var dty = 45
+        var fly = 55
     }
     if (Entity.IsAlive(Entity.GetLocalPlayer())) {
         var font = Render.GetFont("verdana.ttf", 10, true);
-        var x = (Global.GetScreenSize()[0] / 2);
-        var y = (Global.GetScreenSize()[1] / 2);
+        var font2 = Render.GetFont("verdana.ttf", 24, true);
+        var x = (Render.GetScreenSize()[0] / 2);
+        var y = (Render.GetScreenSize()[1] / 2);
         var color = menu.get_color(config.menu_color);
-
+        var real_yaw = Local.GetRealYaw();
+        var fake_yaw = Local.GetFakeYaw();
+        var delta = Math.abs(Math.min(Math.abs(real_yaw - fake_yaw) / 2, 60).toFixed(0));
+        var delta_size = Render.TextSize(String(delta), font);
         if (getDropdownValue(config.indicators.value, 0)) {
-            Render.String(x - 30, y + 15, 0, "Aurora", color, font);
-            Render.String(x + 28, y + 15, 0, String(Math.min(Math.abs(Math.round(Local.GetFakeYaw() - Local.GetRealYaw() / 2)), 60)), color, font);
-            Render.String(x - 12, y + aay, 0, aaText(), color, font);
+            var inverted = UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "AA Direction inverter"]);
+            Render.String(x - 35, y - 15, 1, "<", inverted ? color : [100, 100, 100, 100], font2);
+            Render.String(x + 35, y - 15, 1, ">", !inverted ? color : [100, 100, 100, 100], font2);
         }
 
+
         if (getDropdownValue(config.indicators.value, 1)) {
-            Render.String(x - 12, y + dty, 0, "   " + dtText(), color, font);
-            Render.String(x - 30, y + dty, 0, "  DT", [184 - 35 * Exploit.GetCharge(), 6 + 178 * Exploit.GetCharge(), 6, 255], font);
+            Render.ShadowString(x - 30, y + 15, 0, "A U R O R A", color, font);
+            Render.ShadowString(x, y + 25, 1, delta, color, font);
+            Render.ShadowCircle(x + 12, y, 2, color)
+            Render.ShadowString(x - 18, y + 35, 0, aaText(), color, font);
+
         }
 
         if (getDropdownValue(config.indicators.value, 2)) {
-            Render.String(x - 30, y + fly, 0, flText(), color, font);
+            if (UI.GetValue(["Rage", "Exploits", "Key assignment", "Double tap"])) {
+                Render.ShadowString(x - 14, y + 45, 0, "   " + dtText(), color, font);
+                Render.ShadowString(x - 32, y + 45, 0, "  DT", [184 - 35 * Exploit.GetCharge(), 6 + 178 * Exploit.GetCharge(), 6, 255], font);
+            } else if (UI.GetValue(["Rage", "Exploits", "Key assignment", "Hide shots"])) {
+                Render.ShadowString(x - 14, y + 45, 0, "   " + dtText(), color, font);
+                Render.ShadowString(x - 32, y + 45, 0, "  DT", [184 - 35 * Exploit.GetCharge(), 6 + 178 * 0, 6, 255], font);
+            }
         }
+        if (getDropdownValue(config.indicators.value, 3)) {
+            Render.ShadowString(x - 30, y + 55, 0, flText(), color, font);
+        }
+
     }
 }
-Cheat.RegisterCallback("Draw", "onIndicators")
+
 
 //Aspect Ratio
 function AspectRatio() {
@@ -2183,7 +2439,7 @@ function AspectRatio() {
     }
 }
 
-Cheat.RegisterCallback("FrameStageNotify", "AspectRatio");
+
 
 //Hide Chat
 function hidechat() {
@@ -2193,16 +2449,6 @@ function hidechat() {
         Convar.SetInt("cl_chatfilters", 63)
     }
 }
-Cheat.RegisterCallback("CreateMove", "hidechat")
-
-function hidevc() {
-    if (config.hide_vc.value) {
-        Convar.SetInt("voice_enable", 0)
-    } else if (!config.hide_vc.value || !config.hide_chat.value) {
-        Convar.SetInt("voice_enable", 1)
-    }
-}
-Cheat.RegisterCallback("CreateMove", "hidevc")
 
 //Healthshot effect
 var alpha = 0;
@@ -2244,8 +2490,7 @@ function on_death() {
         size = 360;
     }
 }
-Cheat.RegisterCallback("player_death", "on_death");
-Cheat.RegisterCallback("Draw", "render_effect");
+
 
 //Recharge on swap
 //swap_recharge
@@ -2263,7 +2508,7 @@ function onSwapRecharge() {
     }
 }
 
-Cheat.RegisterCallback("CreateMove", "onSwapRecharge")
+
 
 //Rainbow Bar
 
@@ -2292,21 +2537,22 @@ function HSVtoRGB(h, s, v) {
 
 function DrawRainbow() {
     if (config.rainbow_bar.value) {
-        var colors = HSVtoRGB(Global.Realtime() * config.rainbow_bar_speed.value, 1, 1);
+        var colors = HSVtoRGB(Global.Realtime() * config.rainbow_bar_speed.value / 10 + 1, 1, 1);
         //up
         Render.GradientRect(0, 0, screen_width / 2, 3, 1, [colors.g, colors.b, colors.r, 255], [colors.r, colors.g, colors.b, 255]);
         Render.GradientRect(screen_width / 2, 0, screen_width / 2, 3, 1, [colors.r, colors.g, colors.b, 255], [colors.b, colors.r, colors.g, 255]);
-        //left
-        Render.GradientRect(0, 0, 3, screen_length, 0, [colors.g, colors.b, colors.r, 255], [colors.r, colors.g, colors.b, 255]);
-        //right
-        Render.GradientRect(screen_width - 3, 0, 3, screen_length, 0, [colors.b, colors.r, colors.g, 255], [colors.g, colors.b, colors.r, 255]);
-        //down
-        Render.GradientRect(screen_width / 2, screen_length - 3, screen_width / 2, 3, 1, [colors.b, colors.r, colors.g, 255], [colors.g, colors.b, colors.r, 255]);
-        Render.GradientRect(0, screen_length - 3, screen_width / 2, 3, 1, [colors.r, colors.g, colors.b, 255], [colors.b, colors.r, colors.g, 255]);
+        if (config.rainbow_fullscreen.value) {
+            //left
+            Render.GradientRect(0, 0, 3, screen_length, 0, [colors.g, colors.b, colors.r, 255], [colors.r, colors.g, colors.b, 255]);
+            //right
+            Render.GradientRect(screen_width - 3, 0, 3, screen_length, 0, [colors.b, colors.r, colors.g, 255], [colors.g, colors.b, colors.r, 255]);
+            //down
+            Render.GradientRect(screen_width / 2, screen_length - 3, screen_width / 2, 3, 1, [colors.b, colors.r, colors.g, 255], [colors.g, colors.b, colors.r, 255]);
+            Render.GradientRect(0, screen_length - 3, screen_width / 2, 3, 1, [colors.r, colors.g, colors.b, 255], [colors.b, colors.r, colors.g, 255]);
+        }
     }
 }
 
-Global.RegisterCallback("Draw", "DrawRainbow");
 
 
 //FISH / Chicken ESP
@@ -2347,14 +2593,108 @@ function CH_FISHESP() {
     }
 }
 
-Cheat.RegisterCallback("Draw", "CH_FISHESP");
+//Min damage double tap
 
+function mindmgdt() {
+    if (config.mindmgdt.value) {
+        var enemies = Entity.GetEnemies();
+        for (var i in Entity.GetEnemies()) {
+            if (Entity.GetProp(Entity.GetEnemies()[i], "CBasePlayer", "m_iHealth") <= config.mindmgdt_hp.value) {
+                Ragebot.ForceTargetMinimumDamage(Entity.GetEnemies()[i], Entity.GetProp(enemies[i], "CBasePlayer", "m_iHealth") / 2);
+            }
+        }
+    }
+}
+
+// No Scope distance
+
+function closestTarget() {
+    var local = Entity.GetLocalPlayer();
+    var enemies = Entity.GetEnemies();
+    var dists = [];
+    var damage = [];
+    for (e in enemies) {
+        if (!Entity.IsAlive(enemies[e]) || Entity.IsDormant(enemies[e]) || !Entity.IsValid(enemies[e])) continue;
+        dists.push([enemies[e], calcDist(Entity.GetHitboxPosition(local, 0), Entity.GetHitboxPosition(enemies[e], 0))]);
+    }
+    dists.sort(function (a, b) {
+        return a[1] - b[1];
+    });
+    if (dists.length == 0 || dists == []) return (target = -1);
+    return dists[0][0];
+}
+function calcDist(a, b) {
+    x = a[0] - b[0];
+    y = a[1] - b[1];
+    z = a[2] - b[2];
+    return Math.sqrt(x * x + y * y + z * z);
+}
+function get_metric_distance(a, b) {
+    return Math.floor(Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2) + Math.pow(a[2] - b[2], 2)) * 0.0254);
+}
+
+var target = -1;
+function NoscopeDistance() {
+    if (config.noscope.value) {
+        localplayer = Entity.GetLocalPlayer();
+        localplayer_weapon = Entity.GetWeapon(localplayer);
+        currentweapon = Entity.GetName(localplayer_weapon);
+        if (currentweapon === "g3sg1") {
+            currentweapon = "G3SG1";
+        } else if (currentweapon === "awp") {
+            currentweapon = "AWP";
+        } else if (currentweapon === "scar 20") {
+            currentweapon = "SCAR20";
+        } else {
+            currentweapon = "SSG08";
+        }
+        if (!Ragebot.GetTarget()) target = closestTarget();
+        else target = Ragebot.GetTarget();
+        if (!Entity.IsAlive(target)) {
+            UI.SetValue(["Rage", "SUBTAB_MGR", "Accuracy", "SHEET_MGR", currentweapon, "Auto scope"], 1);
+            return;
+        }
+        if (get_metric_distance(Entity.GetRenderOrigin(Entity.GetLocalPlayer()), Entity.GetRenderOrigin(target)) > config.noscopedistance.value) {
+            UI.SetValue(["Rage", "SUBTAB_MGR", "Accuracy", "SHEET_MGR", currentweapon, "Auto scope"], 0);
+        } else {
+            UI.SetValue(["Rage", "SUBTAB_MGR", "Accuracy", "SHEET_MGR", currentweapon, "Auto scope"], 1);
+        }
+    }
+}
+
+function rainbowmenu(h, s, v) {
+    var r, g, b, i, f, p, q, t;
+    i = Math.floor(h * 6);
+    f = h * 6 - i;
+    p = v * (1 - s);
+    q = v * (1 - f * s);
+    t = v * (1 - (1 - f) * s);
+    switch (i % 6) {
+        case 0: r = v, g = t, b = p; break;
+        case 1: r = q, g = v, b = p; break;
+        case 2: r = p, g = v, b = t; break;
+        case 3: r = p, g = q, b = v; break;
+        case 4: r = t, g = p, b = v; break;
+        case 5: r = v, g = p, b = q; break;
+    }
+    return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
+}
+
+function rainbowmenu() {
+    if (config.rainbowmenu.value) {
+        tickcount = Global.Tickcount();
+        color = rainbowmenu(tickcount % 350 / 350, 1, 1, 1, 255);
+        menu.color = color
+    }
+}
+
+Cheat.RegisterCallback("Draw", "rainbowmenu")
 
 
 // Upon startup shows Aurora ASCII art
 
 function Onstartup() {
-    var Variation = GetMathRandom(1, 7);
+    var Variation = getMathRandom(1, 7);
     if (Variation == 1) {
         Cheat.Print("      _____                                     \n")
         Cheat.Print("     /  _  \\  __ _________  ________________    \n")
@@ -2422,3 +2762,47 @@ function Onstartup() {
     }
 }
 Onstartup();
+
+
+Cheat.RegisterCallback("CreateMove", "onAvoidHitboxes")
+Cheat.RegisterCallback("CreateMove", "onForceSafety")
+Cheat.RegisterCallback("CreateMove", "onPlayerAlive");
+Cheat.RegisterCallback("CreateMove", "onHitchanceInAir")
+Cheat.RegisterCallback("CreateMove", "NoscopeDistance");
+Cheat.RegisterCallback("weapon_fire", "onGetSooter");
+Cheat.RegisterCallback("player_connect_full", "onGetEntity");
+Cheat.RegisterCallback("CreateMove", "onSwapRecharge")
+Cheat.RegisterCallback("Draw", "CH_FISHESP");
+Cheat.RegisterCallback("player_death", "on_death");
+Cheat.RegisterCallback("Draw", "render_effect");
+Cheat.RegisterCallback("CreateMove", "hidechat")
+Cheat.RegisterCallback("FrameStageNotify", "AspectRatio");
+Cheat.RegisterCallback("Draw", "onIndicators")
+Cheat.RegisterCallback("Draw", "watermark");
+Cheat.RegisterCallback("Draw", "AuroraHotkey");
+Cheat.RegisterCallback("FRAME_START", "AuroraClantag");
+Cheat.RegisterCallback("CreateMove", "AuroraDT");
+Cheat.RegisterCallback("Unload", "AuroraDT_UNLOAD");
+Cheat.RegisterCallback("CreateMove", "FastRecharge");
+Cheat.RegisterCallback("round_end", "FLonRoundEnd")
+Cheat.RegisterCallback("round_start", "FLonRoundStart")
+Cheat.RegisterCallback("CreateMove", "KrFLDisable");
+Cheat.RegisterCallback("CreateMove", "AuroraFakelag");
+Cheat.RegisterCallback("CreateMove", "onShakingLegs");
+Cheat.RegisterCallback("CreateMove", "slowwalkspeed")
+Cheat.RegisterCallback("CreateMove", "lowdeltav2");
+Cheat.RegisterCallback("CreateMove", "KratoEPeek");
+Cheat.RegisterCallback("bomb_begindefuse", "Defusing");
+Cheat.RegisterCallback("round_start", "DefuseReset");
+Cheat.RegisterCallback("player_connect_full", "DefuseReset");
+Cheat.RegisterCallback("bomb_abortdefuse", "DefuseReset");
+Cheat.RegisterCallback("player_hurt", "OnHurt");
+Cheat.RegisterCallback("bullet_impact", "OnBulletImpact");
+Cheat.RegisterCallback("CreateMove", "AuroraMode");
+Cheat.RegisterCallback("CreateMove", "AuroraAdvanced");
+Cheat.RegisterCallback("CreateMove", "AuroraSimple");
+Cheat.RegisterCallback("CreateMove", "AuroraNone");
+Cheat.RegisterCallback("Draw", "on_paint")
+Cheat.RegisterCallback("CreateMove", "on_cmove")
+Cheat.RegisterCallback("Unload", "on_unload")
+Cheat.RegisterCallback("Draw", "DrawRainbow");
