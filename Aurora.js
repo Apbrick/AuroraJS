@@ -1384,7 +1384,7 @@ function onAvoidHitboxes() {
     var name = Entity.GetName(weapon)
     var avoidhitboxes = config.avoid_hitboxes.value;
     var players = Entity.GetEnemies()
-    players.forEach(function (player) {
+    players.forEach((function (player) {
         if (avoidhitboxes & (1 << 0)) {
             Ragebot.IgnoreTargetHitbox(player, 0);
             Ragebot.IgnoreTargetHitbox(player, 1);
@@ -1410,7 +1410,7 @@ function onAvoidHitboxes() {
             Ragebot.IgnoreTargetHitbox(player, 11);
             Ragebot.IgnoreTargetHitbox(player, 12);
         }
-    })
+    }))
 }
 
 //Avoid unsafe Hitboxes
@@ -1422,7 +1422,7 @@ function onForceSafety() {
     var name = Entity.GetName(weapon)
     var forcesafety = config.forcesafety.value;
     var players = Entity.GetEnemies()
-    players.forEach(function (player) {
+    players.forEach((function (player) {
         if (getDropdownValue(forcesafety, 0)) {
             Ragebot.ForceHitboxSafety(player, 0);
             Ragebot.ForceHitboxSafety(player, 1);
@@ -1448,7 +1448,7 @@ function onForceSafety() {
             Ragebot.ForceHitboxSafety(player, 11);
             Ragebot.ForceHitboxSafety(player, 12);
         }
-    })
+    }))
 }
 // Forcesafety
 
@@ -2617,9 +2617,9 @@ function closestTarget() {
         if (!Entity.IsAlive(enemies[e]) || Entity.IsDormant(enemies[e]) || !Entity.IsValid(enemies[e])) continue;
         dists.push([enemies[e], calcDist(Entity.GetHitboxPosition(local, 0), Entity.GetHitboxPosition(enemies[e], 0))]);
     }
-    dists.sort(function (a, b) {
+    dists.sort((function (a, b) {
         return a[1] - b[1];
-    });
+    }));
     if (dists.length == 0 || dists == []) return (target = -1);
     return dists[0][0];
 }
