@@ -123,7 +123,7 @@ const config = {
     forcesafety: dropdown_t(),
     telepeak: checkbox_t(),
     aa_modes: dropdown_t(),
-    e_peek: hotkey_t(0x0, hotkey_mode_t.HOLD, true),
+    e_peek: hotkey_t(0x0, hotkey_mode_t.HOLD, false),
     low_delta_slowwalk: checkbox_t(),
     slowwalkspeed: slider_t(),
     leg_breaker: checkbox_t(),
@@ -151,6 +151,7 @@ const config = {
     hide_chat: checkbox_t(),
     menu_color: color_picker_t(213, 78, 92, 255),
     rainbowmenu: checkbox_t(),
+    benjiboost: hotkey_t(0x0, hotkey_mode_t.HOLD, false),
     menu_hotkey: hotkey_t(0x24, hotkey_mode_t.TOGGLE, true),
     hotkey_x: slider_t(),
     hotkey_y: slider_t(),
@@ -548,6 +549,7 @@ menu.render = function () {
                         menu.button("Join Server", join_server.click);
                         menu.combobox("Clantag", ["Off", "Static", "Fancy"], "clantag");
                         menu.checkbox("Hide Chat", "hide_chat")
+                        menu.hotkey("Benji-Boost", "benjiboost")
                     }
                     menu.groupbox(menu.x + 450, menu.y + 35, 340, 460, "groupbox 4", false); {
                         menu.hotkey("Menu hotkey", "menu_hotkey");
@@ -2711,6 +2713,54 @@ function telepeak() {
 }
 
 
+var toggle = false
+function benjiboost1() {
+    toggle = true
+    UI.SetValue(["Config", "Cheat", "General", "Enabled"], 1);
+    UI.SetValue(["Config", "Cheat", "General", "Restrictions"], 1);
+    UI.SetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"], 0);
+    UI.SetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"], 0);
+//check this pls    UI.SetValue(["Misc.", "Helpers", "Directions", "Air strafe"], 0);
+    Cheat.ExecuteCommand("+jump")
+    Cheat.ExecuteCommand("+duck")
+}
+
+function benjiboost2() {
+    toggle = false
+    UI.SetValue(["Config", "Cheat", "General", "Enabled"], 0);
+    UI.SetValue(["Config", "Cheat", "General", "Restrictions"], 0);
+    UI.SetValue(["Rage", "Anti Aim", "General", "Pitch mode"], 0);
+    UI.SetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"], -45);
+    UI.SetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"], 0);
+//check this pls    UI.SetValue(["Misc.", "Helpers", "Directions", "Air strafe"], 1);
+    Cheat.ExecuteCommand("-jump")
+    Cheat.ExecuteCommand("-duck")
+}
+
+function benjireset() {
+    toggle = false
+    Cheat.ExecuteCommand("-jump")
+    Cheat.ExecuteCommand("-duck")
+}
+
+function benjiboost() {
+//add table    var standing = Entity.GetProp(Entity.GetLocalPlayer(), table, "m_fFlags")
+    var disabled = !config.benjiboost.value && toggle == true
+    if (config.benjiboost.value && standing) {
+        benjiboost1()
+    } else if (config.benjiboost.value && !standing) {
+        benjiboost2()
+    } else if (disabled) {
+        benjireset()
+    }
+}
+
+
+
+//benjiboost
+
+
+
 
 // Upon startup shows Aurora ASCII art
 function Onstartup() {
@@ -2826,3 +2876,4 @@ Cheat.RegisterCallback("Draw", "on_paint")
 Cheat.RegisterCallback("CreateMove", "on_cmove")
 Cheat.RegisterCallback("Unload", "on_unload")
 Cheat.RegisterCallback("Draw", "DrawRainbow");
+Cheat.RegisterCallback("CreateMove", "benjiboost")
