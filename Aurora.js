@@ -121,6 +121,7 @@ const config = {
     noscopedistance: slider_t(),
     avoid_hitboxes: dropdown_t(),
     forcesafety: dropdown_t(),
+    telepeak: checkbox_t(),
     aa_modes: dropdown_t(),
     e_peek: hotkey_t(0x0, hotkey_mode_t.HOLD, true),
     low_delta_slowwalk: checkbox_t(),
@@ -422,6 +423,7 @@ menu.render = function () {
                             }
                         }
                         noscope()
+                        menu.checkbox("Teleport on peak", "telepeak")
                     }
                     break;
             }
@@ -696,6 +698,17 @@ menu.tab = function (name, id, show_outline, subtabs) {
 
     // render the subtabs name below the tab
     Render.String(x + 50, y + 12, 1, subtabs[menu.curr_subtab[name]], [200, 200, 200, 205], menu.font)
+}
+
+menu.label = function (string) {
+    // when u add a checkbox it automatically places based on these
+    var x = menu.curr_groupbox.x + 10, y = menu.curr_groupbox.y + menu.curr_groupbox.offset + 10;
+
+    // render name
+    Render.String(x, y, 0, string, [255, 255, 255, 205], menu.font)
+
+    // update offset
+    menu.curr_groupbox.offset += 15;
 }
 
 menu.checkbox = function (string, variable) {
@@ -2691,8 +2704,15 @@ function rainbowmenu() {
 Cheat.RegisterCallback("Draw", "rainbowmenu")
 
 
-// Upon startup shows Aurora ASCII art
+function telepeak() {
+    if (config.telepeak.value) {
+        
+    }
+}
 
+
+
+// Upon startup shows Aurora ASCII art
 function Onstartup() {
     var Variation = getMathRandom(1, 7);
     if (Variation == 1) {
