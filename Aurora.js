@@ -549,6 +549,7 @@ menu.render = function () {
                         menu.button("Join Server", join_server.click);
                         menu.combobox("Clantag", ["Off", "Static", "Fancy"], "clantag");
                         menu.checkbox("Hide Chat", "hide_chat")
+                        menu.label("Benji-boost is only usefull in Danger-Zone")
                         menu.hotkey("Benji-Boost", "benjiboost")
                     }
                     menu.groupbox(menu.x + 450, menu.y + 35, 340, 460, "groupbox 4", false); {
