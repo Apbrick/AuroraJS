@@ -147,6 +147,11 @@ const config = {
     rainbow_fullscreen: checkbox_t(),
     rainbow_bar_speed: slider_t(),
     customesp: dropdown_t(),
+    fog: checkbox_t(),
+    fog_color: color_picker_t(213, 78, 92, 255),
+    fog_start_distance: slider_t(),
+    fog_distance: slider_t(),
+    fog_density: slider_t(),
     clantag: dropdown_t(),
     hide_chat: checkbox_t(),
     menu_color: color_picker_t(213, 78, 92, 255),
@@ -535,7 +540,23 @@ menu.render = function () {
                         menu.multibox("Misc. esp", ["Fish esp", "Chicken esp"], "customesp")
                     }
                     menu.groupbox(menu.x + 450, menu.y + 35, 340, 460, "groupbox 4", false); {
-
+                        /*
+                        fog: checkbox_t(),
+                        fog_color: color_picker_t(213, 78, 92, 255),
+                        fog_start_distance: slider_t(),
+                        fog_distance: slider_t(),
+                        fog_density: slider_t(),
+                        */
+                       menu.checkbox("Fog", "fog")
+                       function fog() {
+                           if (config.fog.value) {
+                               menu.color_picker("   Color", "fog_color", false)
+                               menu.slider("   Start Distance", "fog_start_distance", -1, 2500, 1, false)
+                               menu.slider("   Fog Distance", "fog_distance", -1, 2500, 1, false)
+                               menu.slider("   Fog Density", "fog_density", -1, 100, 1, false)
+                           }
+                       }
+                       fog()
                     }
                     break;
             }
@@ -2709,7 +2730,7 @@ Cheat.RegisterCallback("Draw", "rainbowmenu")
 
 function telepeak() {
     if (config.telepeak.value) {
-        
+
     }
 }
 
@@ -2721,7 +2742,7 @@ function benjiboost1() {
     UI.SetValue(["Config", "Cheat", "General", "Restrictions"], 1);
     UI.SetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"], 0);
     UI.SetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"], 0);
-//check this pls    UI.SetValue(["Misc.", "Helpers", "Directions", "Air strafe"], 0);
+    //check this pls    UI.SetValue(["Misc.", "Helpers", "Directions", "Air strafe"], 0);
     Cheat.ExecuteCommand("+jump")
     Cheat.ExecuteCommand("+duck")
 }
@@ -2733,7 +2754,7 @@ function benjiboost2() {
     UI.SetValue(["Rage", "Anti Aim", "General", "Pitch mode"], 0);
     UI.SetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"], -45);
     UI.SetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"], 0);
-//check this pls    UI.SetValue(["Misc.", "Helpers", "Directions", "Air strafe"], 1);
+    //check this pls    UI.SetValue(["Misc.", "Helpers", "Directions", "Air strafe"], 1);
     Cheat.ExecuteCommand("-jump")
     Cheat.ExecuteCommand("-duck")
 }
@@ -2745,7 +2766,7 @@ function benjireset() {
 }
 
 function benjiboost() {
-//add table    var standing = Entity.GetProp(Entity.GetLocalPlayer(), table, "m_fFlags")
+    //add table    var standing = Entity.GetProp(Entity.GetLocalPlayer(), table, "m_fFlags")
     var disabled = !config.benjiboost.value && toggle == true
     if (config.benjiboost.value && standing) {
         benjiboost1()
@@ -2756,9 +2777,16 @@ function benjiboost() {
     }
 }
 
-
-
-//benjiboost
+function onFogDraw() {
+    if (!config.fog.value) {
+        Convar.SetInt("fog_override", 0)
+    }
+    Convar.SetInt("fog_override", 1)
+    Convar.SetInt("fog_start", config.fog_start_distance.value)
+    Convar.SetInt("fog_send", config.fog_distance.value)
+    Convar.SetInt("fog_maxdensity", (config.fog_density.value / 100))
+    Convar.SetInt("fog_color", menu.get_color(config.fog_color))
+}
 
 
 
@@ -2878,3 +2906,4 @@ Cheat.RegisterCallback("CreateMove", "on_cmove")
 Cheat.RegisterCallback("Unload", "on_unload")
 Cheat.RegisterCallback("Draw", "DrawRainbow");
 Cheat.RegisterCallback("CreateMove", "benjiboost")
+Cheat.RegisterCallback("Draw", "onFogDraw")
