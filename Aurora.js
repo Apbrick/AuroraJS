@@ -2778,6 +2778,7 @@ function benjiboost() {
 }
 
 function onFogDraw() {
+    var fogcolor = menu.get_color(config.fog_color)
     if (!config.fog.value) {
         Convar.SetInt("fog_override", 0)
     }
@@ -2785,7 +2786,8 @@ function onFogDraw() {
     Convar.SetInt("fog_start", config.fog_start_distance.value)
     Convar.SetInt("fog_send", config.fog_distance.value)
     Convar.SetInt("fog_maxdensity", (config.fog_density.value / 100))
-    Convar.SetInt("fog_color", menu.get_color(config.fog_color))
+    Convar.SetInt("fog_color", [fogcolor[0], fogcolor[1], fogcolor[2]])
+    
 }
 
 
