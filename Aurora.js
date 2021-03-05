@@ -463,8 +463,8 @@ menu.render = function () {
                         menu.combobox("Modes", ["None", "Simple", "Advanced", "Aurora", "Anti-Brute", "Custom"], "aa_modes");
                         function aamodes() {
                             if (config.aa_modes.value = 5) {
-                                menu.slider("Real Offset", "customaa_real", -61, 61, 1, false)
-                                menu.slider("Fake Offset", "customaa_fake", -61, 61, 1, false)
+                                menu.slider("Real Offset", "customaa_real", -59, 59, 1, false)
+                                menu.slider("Fake Offset", "customaa_fake", -59, 59, 1, false)
                                 menu.slider("LBY Offset", "customaa_lby", -181, 181, 1, false)
                             }
                         }
