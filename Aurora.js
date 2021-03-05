@@ -446,6 +446,7 @@ menu.render = function () {
                         }
                         noscope()
                         menu.checkbox("Teleport on peak", "telepeak")
+                        menu.label("Enable doubletap to use this feature and make sure not to use it while using auto-sniper")
                     }
                     break;
             }
