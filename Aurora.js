@@ -522,7 +522,7 @@ menu.render = function () {
                 // first subtab
                 case 0:
                     menu.groupbox(menu.x + 110, menu.y + 35, 340, 460, "groupbox 3", false); {
-                        menu.multibox("Indicators", ["Anti-Aim Side", "Anti-Aim Mode", "Doubletap", "Advanced Fakelag"], "indicators");
+                        menu.multibox("Indicators", ["Anti-Aim Side", "Anti-Aim Mode", "Doubletap", "Advanced Fakelag", "No-Scope"], "indicators");
                         menu.checkbox("Hotkey List", "hotkey_list")
                         menu.checkbox("Aspect Ratio", "aspect_ratio")
                         function aspslider() {
@@ -1801,10 +1801,7 @@ function customaa() {
     }
 }
 
-
-
 // E Peek
-
 const time = Globals.Realtime();
 var currently_defusing = false;
 var Aurora_aa = true;
@@ -1930,10 +1927,10 @@ function onShakingLegs() {
     if (config.leg_breaker.value) {
         if (Globals.Tickcount() % getMathRandom(4, 7) == 0) {
             if (UI.GetValue(["Misc.", "Movement", "Leg movement"]) == 2) {
-                UI.SetValue(["Misc.", "Movement", "Leg movement"], 1);
-            } else if (UI.GetValue(["Misc.", "Movement", "Leg movement"]) == 1) {
                 UI.SetValue(["Misc.", "Movement", "Leg movement"], 0);
             } else if (UI.GetValue(["Misc.", "Movement", "Leg movement"]) == 0) {
+                UI.SetValue(["Misc.", "Movement", "Leg movement"], 1);
+            } else if (UI.GetValue(["Misc.", "Movement", "Leg movement"]) == 1) {
                 UI.SetValue(["Misc.", "Movement", "Leg movement"], 2);
             }
         }
@@ -2485,7 +2482,13 @@ function onIndicators() {
         if (getDropdownValue(config.indicators.value, 3)) {
             Render.ShadowString(x - 30, y + 55, 0, flText(), color, font);
         }
-
+        if (getDropdownValue(config.indicators.value, 3)) {
+            if (get_metric_distance(Entity.GetRenderOrigin(Entity.GetLocalPlayer()), Entity.GetRenderOrigin(target)) > config.noscopedistance.value) {
+                Render.ShadowString(x - 32, y - 10, 0, " NOSCOPE", [255, 29, 13, 255], font);
+            } else {
+                Render.ShadowString(x - 32, y - 10, 0, " NOSCOPE", [31, 255, 87, 255], font);
+            }
+        }
     }
 }
 
