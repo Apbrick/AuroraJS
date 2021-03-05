@@ -129,6 +129,7 @@ const config = {
     customaa_fake: slider_t(),
     customaa_real: slider_t(),
     e_peek: hotkey_t(0x0, hotkey_mode_t.HOLD, false),
+    freestanding: hotkey_t(0x0, hotkey_mode_t.HOLD, false),
     low_delta_slowwalk: checkbox_t(),
     slowwalkspeed: slider_t(),
     leg_breaker: checkbox_t(),
@@ -468,6 +469,7 @@ menu.render = function () {
                             }
                         }
                         menu.hotkey("E-Peek", "e_peek");
+                        menu.hotkey("Freestanding", "freestanding")
 
                     }
 
@@ -2985,6 +2987,17 @@ function main_spec() {
 }
 
 
+function onFreestanding() {
+    if (config.freestanding.active) {
+        UI.SetValue(["Rage", "Anti Aim", "Directions", "Auto direction"], 1);
+        UI.SetValue(["Rage", "Anti Aim", "Directions", "At targets"], 0);
+    } else {
+        UI.SetValue(["Rage", "Anti Aim", "Directions", "Auto direction"], 0);
+        UI.SetValue(["Rage", "Anti Aim", "Directions", "At targets"], 1);
+    }
+}
+
+
 // Upon startup shows Aurora ASCII art
 function Onstartup() {
     var Variation = getMathRandom(1, 7);
@@ -3104,3 +3117,4 @@ Cheat.RegisterCallback("Draw", "onFogDraw")
 Cheat.RegisterCallback("CreateMove", "onMinDamage");
 Cheat.RegisterCallback("CreateMove", "dtonpeek")
 Cheat.RegisterCallback("Draw", "main_spec")
+Cheat.RegisterCallback("CreateMove", "onFreestanding")
