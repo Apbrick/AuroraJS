@@ -123,6 +123,9 @@ const config = {
     forcesafety: dropdown_t(),
     telepeak: checkbox_t(),
     aa_modes: dropdown_t(),
+    customaa_lby: slider_t(),
+    customaa_fake: slider_t(),
+    customaa_real: slider_t(),
     e_peek: hotkey_t(0x0, hotkey_mode_t.HOLD, false),
     low_delta_slowwalk: checkbox_t(),
     slowwalkspeed: slider_t(),
@@ -442,7 +445,14 @@ menu.render = function () {
                 // first subtab
                 case 0:
                     menu.groupbox(menu.x + 110, menu.y + 35, 340, 460, "groupbox 3", false); {
-                        menu.combobox("Modes", ["None", "Simple", "Advanced", "Aurora", "Anti-Brute"], "aa_modes");
+                        menu.combobox("Modes", ["None", "Simple", "Advanced", "Aurora", "Anti-Brute", "Custom"], "aa_modes");
+                        function aamodes() {
+                            if (config.aa_modes.value = 5) {
+                                menu.slider("Real Offset", "customaa_real", -61, 61)
+                                menu.slider("Fake Offset", "customaa_fake", -61, 61)
+                                menu.slider("LBY Offset", "customaa_lby", -181, 181)
+                            }
+                        }
                         menu.hotkey("E-Peek", "e_peek");
 
                     }
@@ -547,16 +557,16 @@ menu.render = function () {
                         fog_distance: slider_t(),
                         fog_density: slider_t(),
                         */
-                       menu.checkbox("Fog", "fog")
-                       function fog() {
-                           if (config.fog.value) {
-                               menu.color_picker("   Color", "fog_color", false)
-                               menu.slider("   Start Distance", "fog_start_distance", -1, 2500, 1, false)
-                               menu.slider("   Fog Distance", "fog_distance", -1, 2500, 1, false)
-                               menu.slider("   Fog Density", "fog_density", -1, 100, 1, false)
-                           }
-                       }
-                       fog()
+                        menu.checkbox("Fog", "fog")
+                        function fog() {
+                            if (config.fog.value) {
+                                menu.color_picker("   Color", "fog_color", false)
+                                menu.slider("   Start Distance", "fog_start_distance", -1, 2500, 1, false)
+                                menu.slider("   Fog Distance", "fog_distance", -1, 2500, 1, false)
+                                menu.slider("   Fog Density", "fog_density", -1, 100, 1, false)
+                            }
+                        }
+                        fog()
                     }
                     break;
             }
@@ -1776,6 +1786,22 @@ function OnBulletImpact() {
 }
 
 
+function customaa() {
+    if (config.aa_modes.value == 5) {
+        if (AntiAim.GetOverride() = 0) {
+            AntiAim.SetOverride(1)
+        } else {
+            var lbyoffset = config.customaa_lby.value
+            var realoffset = config.customaa_real.value
+            var fakeoffset = config.customaa_fake.value
+            AntiAim.SetLBYOffset(lbyoffset)
+            AntiAim.SetRealOffset(realoffset)
+            AntiAim.SetFakeOffset(fakeoffset)
+        }
+    }
+}
+
+
 
 // E Peek
 
@@ -2327,6 +2353,8 @@ function aaText() {
         returnVar = "Aurora AA";
     } else if (config.aa_modes.value == 4) {
         returnVar = "Anti-Brute";
+    } else if (config.aa_modes.value == 5) {
+        returnVar = "Custom"
     }
 
     return returnVar;
@@ -2787,7 +2815,7 @@ function onFogDraw() {
     Convar.SetInt("fog_send", config.fog_distance.value)
     Convar.SetInt("fog_maxdensity", (config.fog_density.value / 100))
     Convar.SetInt("fog_color", [fogcolor[0], fogcolor[1], fogcolor[2]])
-    
+
 }
 
 
