@@ -148,7 +148,7 @@ const config = {
     aspect_ratio_slider: slider_t(),
     healthshot_effect: checkbox_t(),
     healthshot_effect_strongness: slider_t(),
-    healthshot_color: color_picker_t(213, 78, 92, 255),
+    healthshot_color: color_picker_t(128, 195, 255, 255),
     rainbow_bar: checkbox_t(),
     rainbow_fullscreen: checkbox_t(),
     rainbow_bar_speed: slider_t(),
