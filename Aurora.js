@@ -1903,15 +1903,16 @@ function lowdeltav2() {
     ab_pitch_mode = UI.GetValue(["Rage", "Anti Aim", "General", "Pitch mode"]);
     ab_at_targets = UI.GetValue(["Rage", "Anti Aim", "Directions", "At targets"]);
     if (config.low_delta_slowwalk.value && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "Slow walk"]) && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "AA Direction inverter"], "AA Inverter")) {
-        AntiAim.SetOverride(1);
-        UI.SetValue(["Rage", "Anti Aim", "Directions", "At targets"], 1);
-        AntiAim.SetFakeOffset(getMathRandom(45, 55));
-        AntiAim.SetRealOffset(-10);
+        AntiAim.SetOverride(1)
+        AntiAim.SetFakeOffset(0)
+        AntiAim.SetRealOffset(-17)
+        AntiAim.SetLBYOffset(0)
     } else if (config.low_delta_slowwalk.value && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "Slow walk"]) && !UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "AA Direction inverter"], "AA Inverter")) {
         AntiAim.SetOverride(1);
         UI.SetValue(["Rage", "Anti Aim", "Directions", "At targets"], 1);
-        AntiAim.SetFakeOffset(getMathRandom(-45, -55));
-        AntiAim.SetRealOffset(10);
+        AntiAim.SetFakeOffset(0)
+        AntiAim.SetRealOffset(17)
+        AntiAim.SetLBYOffset(0)
     } else {
         AntiAim.SetOverride(0);
         UI.SetValue(["Config", "Cheat", "General", "Restrictions"], ab_restrictions);
