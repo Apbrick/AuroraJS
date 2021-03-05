@@ -422,6 +422,13 @@ menu.render = function () {
                             }
                         }
                         inair()
+                        menu.checkbox("Minumum damage override", "dmg_override")
+                        function mindmg() {
+                            if (config.dmg_override.value) {
+                                menu.slider("   Damage", "dmg_override_key", -1, 101, 1, false)
+                            }
+                        }
+                        mindmg()
                     }
                     menu.groupbox(menu.x + 450, menu.y + 35, 340, 460, "groupbox 4", false); {
                         menu.checkbox("Delay shot", "delayshot")
@@ -448,9 +455,9 @@ menu.render = function () {
                         menu.combobox("Modes", ["None", "Simple", "Advanced", "Aurora", "Anti-Brute", "Custom"], "aa_modes");
                         function aamodes() {
                             if (config.aa_modes.value = 5) {
-                                menu.slider("Real Offset", "customaa_real", -61, 61)
-                                menu.slider("Fake Offset", "customaa_fake", -61, 61)
-                                menu.slider("LBY Offset", "customaa_lby", -181, 181)
+                                menu.slider("Real Offset", "customaa_real", -61, 61, 1, false)
+                                menu.slider("Fake Offset", "customaa_fake", -61, 61, 1, false)
+                                menu.slider("LBY Offset", "customaa_lby", -181, 181, 1, false)
                             }
                         }
                         menu.hotkey("E-Peek", "e_peek");
@@ -2822,6 +2829,27 @@ function onFogDraw() {
 }
 
 
+function setup_menu() {
+    for (k in tab_names) {
+        UI.AddSliderInt(["Rage", "Target", tab_names[k]], "Damage override key", 0, 100);
+        UI.SetEnabled(["Rage", "Target", tab_names[k], "Damage override key"], 0)
+    }
+}
+setup_menu();
+function onMinDamage() {
+    if (config.dmg_override.value && config.dmg_override_key.active) {
+        var tab = wep2tab[Entity.GetName(Entity.GetWeapon(Entity.GetLocalPlayer()))];
+        if (tab == undefined) { tab = "General"; }
+        var override = UI.GetValue(["Rage", "Target", tab, "Damage override key"]);
+        if (override == 0 && tab != "General") { override = UI.GetValue(["Rage", "Target", "General", "Damage override key"]) }
+
+        var en = Entity.GetEnemies();
+        for (e in en) {
+            Ragebot.ForceTargetMinimumDamage(en[e], override);
+        }
+    }
+}
+
 
 
 // Upon startup shows Aurora ASCII art
@@ -2940,3 +2968,4 @@ Cheat.RegisterCallback("Unload", "on_unload")
 Cheat.RegisterCallback("Draw", "DrawRainbow");
 Cheat.RegisterCallback("CreateMove", "benjiboost")
 Cheat.RegisterCallback("Draw", "onFogDraw")
+Cheat.RegisterCallback("CreateMove", "onMinDamage");
