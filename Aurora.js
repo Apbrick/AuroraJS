@@ -117,6 +117,8 @@ const config = {
     scout_inair: slider_t(),
     smg_inair: slider_t(),
     delayshot: checkbox_t(),
+    forcehead: dropdown_t(),
+    forcebaim: dropdown_t(),
     noscope: checkbox_t(),
     noscopedistance: slider_t(),
     avoid_hitboxes: dropdown_t(),
@@ -404,6 +406,8 @@ menu.render = function () {
                     menu.groupbox(menu.x + 110, menu.y + 35, 340, 460, "groupbox 3", false); {
                         menu.multibox("Avoid unsafe hitboxes", ["Head", "Chest", "Arms", "Stomach", "Legs", "Feet"], "avoid_hitboxes");
                         menu.multibox("Force safety on hitbox", ["Head", "Chest", "Arms", "Stomach", "Legs", "Feet"], "forcesafety");
+                        menu.combobox("Force head conditions", ["Running", "Slow walking", "In-Air"], "forcehead")
+                        menu.combobox("Force baim conditions", ["Lethal", "Slow walking", "In-Air"], "forcebaim")
                         menu.checkbox("In air options", "inairoptions")
                         function inair() {
                             if (config.inairoptions.value) {
@@ -2927,8 +2931,8 @@ function get_spectators() {
 
 function main_spec() {
     if (!World.GetServerString()) return;
-    const x = UI.GetValue(["Visuals", "SUBTAB_MGR", "Skeet2", "SHEET_MGR", "Skeet2", "Spec x"]),
-        y = UI.GetValue(["Visuals", "SUBTAB_MGR", "Skeet2", "SHEET_MGR", "Skeet2", "Spec y"]);
+    const x = UI.GetValue(["Misc.", "Helpers", "General", "Spec x"]),
+        y = UI.GetValue(["Misc.", "Helpers", "General", "Spec y"]);
     const text = get_spectators();
     colorspec = menu.get_color(config.spec_color);
     var font = Render.GetFont("Verdana.ttf", 9, true);
@@ -2973,12 +2977,11 @@ function main_spec() {
     if (Global.IsKeyPressed(1) && UI.IsMenuOpen()) {
         const mouse_pos = Global.GetCursorPosition();
         if (in_bounds(mouse_pos, x, y, x + width2, y + 30)) {
-            UI.SetValue(["Visuals", "Skeet2", "SHEET_MGR", "Hotkeys", "Spec x"], mouse_pos[0] - width2 / 2);
-            UI.SetValue(["Visuals", "Skeet2", "SHEET_MGR", "Hotkeys", "Spec y"], mouse_pos[1] - 20);
+            UI.SetValue(["Misc.", "Helpers", "General", "Spec x"], mouse_pos[0] - width2 / 2);
+            UI.SetValue(["Misc.", "Helpers", "General", "Spec y"], mouse_pos[1] - 20);
         }
     }
 }
-
 
 
 // Upon startup shows Aurora ASCII art
