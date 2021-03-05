@@ -155,6 +155,8 @@ const config = {
     fog_start_distance: slider_t(),
     fog_distance: slider_t(),
     fog_density: slider_t(),
+    speclist: checkbox_t(),
+    spec_color: color_picker_t(213, 78, 92, 255),
     clantag: dropdown_t(),
     hide_chat: checkbox_t(),
     menu_color: color_picker_t(213, 78, 92, 255),
@@ -531,6 +533,13 @@ menu.render = function () {
                     menu.groupbox(menu.x + 110, menu.y + 35, 340, 460, "groupbox 3", false); {
                         menu.multibox("Indicators", ["Anti-Aim Side", "Anti-Aim Mode", "Doubletap", "Advanced Fakelag", "No-Scope"], "indicators");
                         menu.checkbox("Hotkey List", "hotkey_list")
+                        menu.checkbox("Spectator List", "speclist")
+                        function speclist() {
+                            if (config.speclist.value) {
+                                menu.color_picker("  Color", "spec_color", false)
+                            }
+                        }
+                        speclist()
                         menu.checkbox("Aspect Ratio", "aspect_ratio")
                         function aspslider() {
                             if (config.aspect_ratio.value) {
@@ -2871,7 +2880,104 @@ function dtonpeek() {
         }
     }
 }
+const window_x = UI.AddSliderInt(["Misc.", "Helpers", "General"], "Spec x", 0, Global.GetScreenSize()[0])
+const window_y = UI.AddSliderInt(["Misc.", "Helpers", "General"], "Spec y", 0, Global.GetScreenSize()[1])
 
+var colorspec = menu.get_color(config.spec_color);
+
+
+var alpha = 0;
+var salpha = 0;
+var maxwidth = 0;
+var swalpha = 0;
+var fdalpha = 0;
+var apalpha = 0;
+var aialpha = 0;
+var spalpha = 0;
+var fbalpha = 0;
+var dtalpha = 0;
+var hsalpha = 0;
+var doalpha = 0;
+var username = Cheat.GetUsername();
+var textalpha = 0;
+var h = new Array();
+
+function in_bounds(vec, x, y, x2, y2) {
+    return (vec[0] > x) && (vec[1] > y) && (vec[0] < x2) && (vec[1] < y2)
+}
+function get_spectators() {
+    var specs = [];
+    const players = Entity.GetPlayers();
+
+    for (i = 0; i < players.length; i++) {
+        const cur = players[i];
+
+        if (Entity.GetProp(cur, "CBasePlayer", "m_hObserverTarget") != "m_hObserverTarget") {
+            const obs = Entity.GetProp(cur, "CBasePlayer", "m_hObserverTarget")
+
+            if (obs === Entity.GetLocalPlayer()) {
+                const name = Entity.GetName(cur);
+                specs.push(name);
+            }
+        }
+    }
+
+    return specs;
+}
+
+function main_spec() {
+    if (!World.GetServerString()) return;
+    const x = UI.GetValue(["Visuals", "SUBTAB_MGR", "Skeet2", "SHEET_MGR", "Skeet2", "Spec x"]),
+        y = UI.GetValue(["Visuals", "SUBTAB_MGR", "Skeet2", "SHEET_MGR", "Skeet2", "Spec y"]);
+    const text = get_spectators();
+    colorspec = menu.get_color(config.spec_color);
+    var font = Render.GetFont("Verdana.ttf", 9, true);
+    var frames = 8 * Globals.Frametime();
+    var width2 = 84;
+    var maxwidth2 = 0;
+    var Gradient = config.speclist.value;
+    var rgb = HSVtoRGB(Global.Tickcount() % 350 / 350, 1, 1);
+
+    if (text.length > 0) {
+        salpha = Math.min(salpha + frames, 1);
+    } else {
+        salpha = salpha - frames;
+        if (salpha < 0) salpha = 0;
+    }
+
+    for (i = 0; i < text.length; i++) {
+        if (Render.TextSize(text[i], font)[0] > maxwidth2) {
+            maxwidth2 = Render.TextSize(text[i], font)[0];
+        }
+    }
+    if (maxwidth2 == 0) maxwidth2 = 50;
+    width2 = width2 + maxwidth2;
+
+    if (Gradient) {
+        Render.GradientRect(x, y + 3, width2, 2, 1, [rgb.r, rgb.g, rgb.b, salpha * 255], [rgb.g, rgb.b, rgb.r, salpha * 255]);
+    } else {
+        Render.FilledRect(x, y + 3, width2, 2, [colorspec[0], colorspec[1], colorspec[2], salpha * 255]);
+    }
+    Render.FilledRect(x, y + 5, width2, 18, [17, 17, 17, salpha * 255]);
+    Render.String(x + width2 / 2 - (Render.TextSize("Spectators", font)[0] / 2) + 2, y + 9, 0, "Spectators", [0, 0, 0, salpha * 255 / 1.3], font);
+    Render.String(x + width2 / 2 - (Render.TextSize("Spectators", font)[0] / 2) + 1, y + 8, 0, "Spectators", [255, 255, 255, salpha * 255], font);
+    for (i = 0; i < text.length; i++) {
+        Render.FilledRect(x + 72 + width2 - (Render.TextSize(toString(text), font)[0]), y + 24 + 15 * i, 12, 12, [20, 20, 20, 255]);
+        Render.String(x + 77 + width2 - (Render.TextSize(toString(text), font)[0]), y + 24 + 15 * i, 1, "?", [255, 255, 255, 255 / 1.3], font);
+        Render.String(x + (Render.TextSize((text[i]), font)[0] / 2), y + 24 + 15 * i, 1, text[i], [0, 0, 0, 255 / 1.3], font);
+        Render.String(x + (Render.TextSize((text[i]), font)[0] / 2), y + 24 + 15 * i, 1, text[i], [255, 255, 255, 255], font);
+    }
+
+
+
+    if (Global.IsKeyPressed(1) && UI.IsMenuOpen()) {
+        const mouse_pos = Global.GetCursorPosition();
+        if (in_bounds(mouse_pos, x, y, x + width2, y + 30)) {
+            UI.SetValue(["Visuals", "Skeet2", "SHEET_MGR", "Hotkeys", "Spec x"], mouse_pos[0] - width2 / 2);
+            UI.SetValue(["Visuals", "Skeet2", "SHEET_MGR", "Hotkeys", "Spec y"], mouse_pos[1] - 20);
+        }
+    }
+}
 
 
 
@@ -2993,3 +3099,4 @@ Cheat.RegisterCallback("CreateMove", "benjiboost")
 Cheat.RegisterCallback("Draw", "onFogDraw")
 Cheat.RegisterCallback("CreateMove", "onMinDamage");
 Cheat.RegisterCallback("CreateMove", "dtonpeek")
+Cheat.RegisterCallback("Draw", "main_spec")
