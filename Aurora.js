@@ -2850,6 +2850,29 @@ function onMinDamage() {
     }
 }
 
+notpeeked = 0
+peeked = 0
+
+function dtonpeek() {
+    if (config.telepeak.value) {
+        if (Ragebot.GetTargets() == "" && notpeeked == 0) {
+            UI.SetValue(["Rage", "Exploits", "General", "Double tap"], 1)
+        }
+        else if (Ragebot.GetTargets() != "") {
+            notpeeked = 1
+            peeked = Globals.Realtime()
+        }
+
+        if (notpeeked == 1) {
+            UI.SetValue(["Rage", "Exploits", "General", "Double tap"], 0)
+            if (peeked + 1 < Globals.Realtime()) {
+                notpeeked = 0
+            }
+        }
+    }
+}
+
+
 
 
 // Upon startup shows Aurora ASCII art
@@ -2969,3 +2992,4 @@ Cheat.RegisterCallback("Draw", "DrawRainbow");
 Cheat.RegisterCallback("CreateMove", "benjiboost")
 Cheat.RegisterCallback("Draw", "onFogDraw")
 Cheat.RegisterCallback("CreateMove", "onMinDamage");
+Cheat.RegisterCallback("CreateMove", "dtonpeek")
