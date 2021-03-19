@@ -285,11 +285,11 @@ config_system.save = function () {
         const object = config[variable];
 
         // convert variable to JSON and save it to file
-        DataFile.SetKey("config.aurora", variable, JSON.stringify(object));
+        DataFile.SetKey("Aurora.ini", variable, JSON.stringify(object));
     }
 
     // save/create file
-    DataFile.Save("config.aurora");
+    DataFile.Save("Aurora.ini");
 
     // log
     Cheat.Print("[Aurora] Configuration saved.\n");
@@ -298,12 +298,12 @@ config_system.save = function () {
 config_system.load = function () {
 
     // load the file
-    DataFile.Load("config.aurora");
+    DataFile.Load("Aurora.ini");
 
     // loop thru all config variables
     for (var variable in config) {
         // get the JSON value
-        var string = DataFile.GetKey("config.aurora", variable);
+        var string = DataFile.GetKey("Aurora.ini", variable);
 
         // check if JSON isn't valid
         if (!string)
@@ -323,6 +323,17 @@ config_system.load = function () {
     // log
     Cheat.Print("[Aurora] Configuration loaded.\n");
 }
+
+config_system.reset = function () {
+    for (var variable in config) {
+        DataFile.EraseKey("Aurora.ini", variable);
+    }
+
+    DataFile.Save("Aurora.ini");
+
+    Cheat.Print("[Aurora] Configuration reset.\n");
+}
+
 
 /* region: menu */
 
@@ -494,7 +505,7 @@ menu.render = function () {
                     menu.groupbox(menu.x + 110, menu.y + 35, 340, 460, "groupbox 3", false); {
                         menu.combobox("Aurora Doubletap", ["None", "Fast", "Quick", "Supersonic"], "Aurora_doubletap");
                         function dtshow() {
-                            if (config.Aurora_doubletap.value == 1 || config.Aurora_doubletap.value == 2 || config.Aurora_doubletap.value == 3) {
+                            if (Aurora.ini_doubletap.value == 1 || Aurora.ini_doubletap.value == 2 || Aurora.ini_doubletap.value == 3) {
                                 menu.checkbox("Fast Recharge", "fast_recharge");
                                 menu.checkbox("Recharge on swap", "weapon_swap_recharge");
                                 menu.checkbox("HP / 2", "mindmgdt")
@@ -612,6 +623,7 @@ menu.render = function () {
                         menu.checkbox("Rainbow menu", "rainbowmenu")
                         menu.button("Save config", config_system.save);
                         menu.button("Load config", config_system.load);
+                        menu.button("Reset config", config_system.reset);
                     }
                     break;
             }
@@ -2034,18 +2046,18 @@ function DT_Shots(ticks) {
 
 
 function AuroraDT() {
-    if (config.Aurora_doubletap.value & (1 << 0)) {
+    if (Aurora.ini_doubletap.value & (1 << 0)) {
         Exploit.EnableRecharge(), Exploit.OverrideShift(12), Exploit.OverrideTolerance(3)
     }
-    if (config.Aurora_doubletap.value & (1 << 1)) {
+    if (Aurora.ini_doubletap.value & (1 << 1)) {
         var GetCharge = Exploit.GetCharge();
         Exploit[(1 != GetCharge ? "Enable" : "Disable") + "Recharge"](), Convar.SetInt("cl_clock_correction", 0), Convar.SetInt("sv_maxusrcmdprocessticks", 14), Exploit.OverrideShift(12),
             Exploit.OverrideTolerance(0), DT_Shots(14) && 1 != GetCharge && (Exploit.DisableRecharge(), Exploit.Recharge())
-    } else if (config.Aurora_doubletap.value & (1 << 2)) {
+    } else if (Aurora.ini_doubletap.value & (1 << 2)) {
         var GetCharge = Exploit.GetCharge();
         Exploit[(1 != GetCharge ? "Enable" : "Disable") + "Recharge"](), Convar.SetInt("cl_clock_correction", 0), Convar.SetInt("sv_maxusrcmdprocessticks", 16), Exploit.OverrideShift(14),
             Exploit.OverrideTolerance(0), DT_Shots(16) && 1 != GetCharge && (Exploit.DisableRecharge(), Exploit.Recharge())
-    } else if (config.Aurora_doubletap.value & (1 << 3)) {
+    } else if (Aurora.ini_doubletap.value & (1 << 3)) {
         var GetCharge = Exploit.GetCharge();
         Exploit[(1 != GetCharge ? "Enable" : "Disable") + "Recharge"](), Convar.SetInt("cl_clock_correction", 0), Convar.SetInt("sv_maxusrcmdprocessticks", 18), Exploit.OverrideShift(16),
             Exploit.OverrideTolerance(0), DT_Shots(18) && 1 != GetCharge && (Exploit.DisableRecharge(), Exploit.Recharge())
@@ -2384,13 +2396,13 @@ function aaText() {
 function dtText() {
     var returnVar = "";
 
-    if (config.Aurora_doubletap.value == 0) {
+    if (Aurora.ini_doubletap.value == 0) {
         returnVar = "None";
-    } else if (config.Aurora_doubletap.value == 1) {
+    } else if (Aurora.ini_doubletap.value == 1) {
         returnVar = "Fast";
-    } else if (config.Aurora_doubletap.value == 2) {
+    } else if (Aurora.ini_doubletap.value == 2) {
         returnVar = "Quick";
-    } else if (config.Aurora_doubletap.value == 3) {
+    } else if (Aurora.ini_doubletap.value == 3) {
         returnVar = "Supersonic";
     }
 
