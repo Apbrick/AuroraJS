@@ -138,6 +138,8 @@ const config = {
     weapon_swap_recharge: checkbox_t(),
     mindmgdt: checkbox_t(),
     mindmgdt_hp: slider_t(),
+    dmg_override: checkbox_t(),
+    dmg_override_key: hotkey_t(0x0, hotkey_mode_t.TOGGLE, false),
     advanced_fakelag: dropdown_t(),
     FLonRoundEnd: checkbox_t(),
     fake_lag_min: slider_t(),
@@ -160,6 +162,7 @@ const config = {
     fog_density: slider_t(),
     speclist: checkbox_t(),
     spec_color: color_picker_t(213, 78, 92, 255),
+    speclist_gradient: checkbox_t(),
     clantag: dropdown_t(),
     hide_chat: checkbox_t(),
     menu_color: color_picker_t(213, 78, 92, 255),
@@ -417,9 +420,13 @@ menu.render = function () {
                 case 0:
                     menu.groupbox(menu.x + 110, menu.y + 35, 340, 460, "groupbox 3", false); {
                         menu.multibox("Avoid unsafe hitboxes", ["Head", "Chest", "Arms", "Stomach", "Legs", "Feet"], "avoid_hitboxes");
+                        menu.label(" ")
                         menu.multibox("Force safety on hitbox", ["Head", "Chest", "Arms", "Stomach", "Legs", "Feet"], "forcesafety");
-                        menu.combobox("Force head conditions", ["Running", "Slow walking", "In-Air"], "forcehead")
-                        menu.combobox("Force baim conditions", ["Lethal", "Slow walking", "In-Air"], "forcebaim")
+                        menu.label(" ")
+                        menu.multibox("Force head conditions", ["Running", "Slow walking", "In-Air"], "forcehead")
+                        menu.label(" ")
+                        menu.multibox("Force baim conditions", ["Lethal", "Slow walking", "In-Air"], "forcebaim")
+                        menu.label(" ")
                         menu.checkbox("In air options", "inairoptions")
                         function inair() {
                             if (config.inairoptions.value) {
@@ -440,6 +447,7 @@ menu.render = function () {
                             }
                         }
                         inair()
+                        menu.label(" ")
                         menu.checkbox("Minumum damage override", "dmg_override")
                         function mindmg() {
                             if (config.dmg_override.value) {
@@ -450,6 +458,7 @@ menu.render = function () {
                     }
                     menu.groupbox(menu.x + 450, menu.y + 35, 340, 460, "groupbox 4", false); {
                         menu.checkbox("Delay shot", "delayshot")
+                        menu.label(" ")
                         menu.checkbox("No-scope Distance", "noscope")
                         function noscope() {
                             if (config.noscope.value) {
@@ -457,8 +466,10 @@ menu.render = function () {
                             }
                         }
                         noscope()
+                        menu.label(" ")
                         menu.checkbox("Teleport on peak", "telepeak")
-                        menu.label("Enable doubletap to use this feature and make sure not to use it while using auto-sniper")
+                        menu.label("Enable doubletap to use this feature")
+                        menu.label("and make sure not to use it while using auto-sniper")
                     }
                     break;
             }
@@ -471,7 +482,7 @@ menu.render = function () {
                 // first subtab
                 case 0:
                     menu.groupbox(menu.x + 110, menu.y + 35, 340, 460, "groupbox 3", false); {
-                        menu.combobox("Modes", ["None", "Simple", "Advanced", "Aurora", "Anti-Brute", "Custom"], "aa_modes");
+                        menu.combobox("Modes", ["None", "Simple", "Advanced", "Aurora", "Anti-Brute"], "aa_modes");
                         function aamodes() {
                             if (config.aa_modes.value = 5) {
                                 menu.slider("Real Offset", "customaa_real", -59, 59, 1, false)
@@ -550,14 +561,20 @@ menu.render = function () {
                 case 0:
                     menu.groupbox(menu.x + 110, menu.y + 35, 340, 460, "groupbox 3", false); {
                         menu.multibox("Indicators", ["Anti-Aim Side", "Anti-Aim Mode", "Doubletap", "Advanced Fakelag", "No-Scope"], "indicators");
+                        menu.label(" ")
                         menu.checkbox("Hotkey List", "hotkey_list")
+                        menu.label(" ")
                         menu.checkbox("Spectator List", "speclist")
                         function speclist() {
                             if (config.speclist.value) {
-                                menu.color_picker("  Color", "spec_color", false)
+                                menu.checkbox("Rainbow", "speclist_gradient")
+                                if (!config.speclist_gradient.value) {
+                                    menu.color_picker("  Color", "spec_color", false)
+                                }
                             }
                         }
                         speclist()
+                        menu.label(" ")
                         menu.checkbox("Aspect Ratio", "aspect_ratio")
                         function aspslider() {
                             if (config.aspect_ratio.value) {
@@ -565,6 +582,7 @@ menu.render = function () {
                             }
                         }
                         aspslider();
+                        menu.label(" ")
                         menu.checkbox("Kill Effect", "healthshot_effect")
                         function healthslider() {
                             if (config.healthshot_effect.value) {
@@ -573,6 +591,7 @@ menu.render = function () {
                             }
                         }
                         healthslider();
+                        menu.label(" ")
                         menu.checkbox("Rainbow Bar", "rainbow_bar")
                         function rainbowbar() {
                             if (config.rainbow_bar.value) {
@@ -581,6 +600,7 @@ menu.render = function () {
                             }
                         }
                         rainbowbar();
+                        menu.label(" ")
                         menu.multibox("Misc. esp", ["Fish esp", "Chicken esp"], "customesp")
                     }
                     menu.groupbox(menu.x + 450, menu.y + 35, 340, 460, "groupbox 4", false); {
@@ -595,7 +615,6 @@ menu.render = function () {
                         function fog() {
                             if (config.fog.value) {
                                 menu.color_picker("   Color", "fog_color", false)
-                                menu.slider("   Start Distance", "fog_start_distance", -1, 2500, 1, false)
                                 menu.slider("   Fog Distance", "fog_distance", -1, 2500, 1, false)
                                 menu.slider("   Fog Density", "fog_density", -1, 100, 1, false)
                             }
@@ -1863,7 +1882,8 @@ function KratoEPeek() {
         AntiAim.SetOverride(1);
         UI.SetValue(["Config", "Cheat", "General", "Restrictions"], 0);
         UI.SetValue(["Rage", "Anti Aim", "General", "Pitch mode"], 0);
-        UI.SetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"], getMathRandom(168, 174));
+        AntiAim.SetOverride(1)
+        AntiAim.SetLBYOffset(getMathRandom(168, 174));
         UI.SetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"], 4);
         UI.SetValue(["Rage", "Anti Aim", "General", "Key assignment", "Jitter"], 3);
         UI.SetValue(["Rage", "Anti Aim", "Directions", "At targets"], 0);
@@ -1995,7 +2015,6 @@ function AuroraFakelag() {
             UI.SetValue(["Rage", "Fake Lag", "General", "Limit"], fluctuate);
         }
         UI.SetValue(["Rage", "Fake Lag", "General", "Jitter"], (getMathRandom(12, 19)));
-        Cheat.Print(String(getVelocity(Entity.GetLocalPlayer()) + "\n"));
     }
 };
 function FLonRoundEnd() {
@@ -2805,23 +2824,23 @@ function telepeak() {
 var toggle = false
 function benjiboost1() {
     toggle = true
-    UI.SetValue(["Config", "Cheat", "General", "Enabled"], 1);
+    UI.SetValue(["Rage", "Anti Aim", "General", "Enabled"], 1);
     UI.SetValue(["Config", "Cheat", "General", "Restrictions"], 1);
     UI.SetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"], 0);
     UI.SetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"], 0);
-    //check this pls    UI.SetValue(["Misc.", "Helpers", "Directions", "Air strafe"], 0);
+    UI.SetValue(["Misc.", "Movement", "General", "Strafe assistance"], 0);
     Cheat.ExecuteCommand("+jump")
     Cheat.ExecuteCommand("+duck")
 }
 
 function benjiboost2() {
     toggle = false
-    UI.SetValue(["Config", "Cheat", "General", "Enabled"], 0);
+    UI.SetValue(["Rage", "Anti Aim", "General", "Enabled"], 0);
     UI.SetValue(["Config", "Cheat", "General", "Restrictions"], 0);
     UI.SetValue(["Rage", "Anti Aim", "General", "Pitch mode"], 0);
     UI.SetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"], -45);
     UI.SetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"], 0);
-    //check this pls    UI.SetValue(["Misc.", "Helpers", "Directions", "Air strafe"], 1);
+    UI.SetValue(["Misc.", "Movement", "General", "Strafe assistance"], 1);
     Cheat.ExecuteCommand("-jump")
     Cheat.ExecuteCommand("-duck")
 }
@@ -2833,30 +2852,66 @@ function benjireset() {
 }
 
 function benjiboost() {
-    //add table    var standing = Entity.GetProp(Entity.GetLocalPlayer(), table, "m_fFlags")
+    var standing = Entity.GetProp(Entity.GetLocalPlayer(), "CFuncMoveLinear", "m_fFlags")
     var disabled = !config.benjiboost.value && toggle == true
-    if (config.benjiboost.value && standing) {
-        benjiboost1()
-    } else if (config.benjiboost.value && !standing) {
-        benjiboost2()
+    if (config.benjiboost.active && standing) {
+        toggle = true
+        UI.SetValue(["Rage", "Anti Aim", "General", "Enabled"], 1);
+        UI.SetValue(["Config", "Cheat", "General", "Restrictions"], 1);
+        UI.SetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"], 0);
+        UI.SetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"], 0);
+        UI.SetValue(["Misc.", "Movement", "General", "Strafe assistance"], 0);
+        Cheat.ExecuteCommand("+jump")
+        Cheat.ExecuteCommand("+duck")
+    } else if (config.benjiboost.active && !standing) {
+        toggle = false
+        UI.SetValue(["Rage", "Anti Aim", "General", "Enabled"], 0);
+        UI.SetValue(["Config", "Cheat", "General", "Restrictions"], 0);
+        UI.SetValue(["Rage", "Anti Aim", "General", "Pitch mode"], 0);
+        UI.SetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"], -45);
+        UI.SetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"], 0);
+        UI.SetValue(["Misc.", "Movement", "General", "Strafe assistance"], 1);
+        Cheat.ExecuteCommand("-jump")
+        Cheat.ExecuteCommand("-duck")
     } else if (disabled) {
-        benjireset()
+        toggle = false
+        Cheat.ExecuteCommand("-jump")
+        Cheat.ExecuteCommand("-duck")
     }
 }
 
 function onFogDraw() {
-    var fogcolor = menu.get_color(config.fog_color)
     if (!config.fog.value) {
-        Convar.SetInt("fog_override", 0)
+        // Check if the fog isn't already disabled (optimization)
+        if (Convar.GetString("fog_override") !== "0") {
+            Convar.SetString("fog_override", "0");
+        }
+    }    // Get our fog properties
+    const clr = menu.get_color(config.fog_color);
+    const clr_value = clr[0] + " " + clr[1] + " " + clr[2];
+
+    const dist = config.fog_distance.value.toString();
+    const dens = (config.fog_density.value / 100).toString();
+
+    // Check if the fog's color isn't the same as our desired color
+    if (Convar.GetString("fog_color") !== clr_value) {
+        // Update color
+        Convar.SetString("fog_color", clr_value);
     }
-    Convar.SetInt("fog_override", 1)
-    Convar.SetInt("fog_start", config.fog_start_distance.value)
-    Convar.SetInt("fog_send", config.fog_distance.value)
-    Convar.SetInt("fog_maxdensity", (config.fog_density.value / 100))
-    Convar.SetInt("fog_color", [fogcolor[0], fogcolor[1], fogcolor[2]])
 
+    // Check if the fog's end distance isn't the same as our desired end distance
+    if (Convar.GetString("fog_end") !== dist) {
+        // Update distance
+        Convar.SetString("fog_start", "0");
+        Convar.SetString("fog_end", dist);
+    }
+
+    // Check if the fog's density isn't the same as our desired density
+    if (Convar.GetString("fog_maxdensity") !== dens) {
+        // Update density
+        Convar.SetString("fog_maxdensity", dens);
+    }
 }
-
 
 function setup_menu() {
     for (k in tab_names) {
@@ -2946,6 +3001,9 @@ function get_spectators() {
 }
 
 function main_spec() {
+    if (!config.speclist.value) {
+        return
+    }
     if (!World.GetServerString()) return;
     const x = UI.GetValue(["Misc.", "Helpers", "General", "Spec x"]),
         y = UI.GetValue(["Misc.", "Helpers", "General", "Spec y"]);
@@ -2955,7 +3013,7 @@ function main_spec() {
     var frames = 8 * Globals.Frametime();
     var width2 = 84;
     var maxwidth2 = 0;
-    var Gradient = config.speclist.value;
+    var Gradient = config.speclist_gradient.value;
     var rgb = HSVtoRGB(Global.Tickcount() % 350 / 350, 1, 1);
 
     if (text.length > 0) {
@@ -2982,10 +3040,8 @@ function main_spec() {
     Render.String(x + width2 / 2 - (Render.TextSize("Spectators", font)[0] / 2) + 2, y + 9, 0, "Spectators", [0, 0, 0, salpha * 255 / 1.3], font);
     Render.String(x + width2 / 2 - (Render.TextSize("Spectators", font)[0] / 2) + 1, y + 8, 0, "Spectators", [255, 255, 255, salpha * 255], font);
     for (i = 0; i < text.length; i++) {
-        Render.FilledRect(x + 72 + width2 - (Render.TextSize(toString(text), font)[0]), y + 24 + 15 * i, 12, 12, [20, 20, 20, 255]);
-        Render.String(x + 77 + width2 - (Render.TextSize(toString(text), font)[0]), y + 24 + 15 * i, 1, "?", [255, 255, 255, 255 / 1.3], font);
-        Render.String(x + (Render.TextSize((text[i]), font)[0] / 2), y + 24 + 15 * i, 1, text[i], [0, 0, 0, 255 / 1.3], font);
-        Render.String(x + (Render.TextSize((text[i]), font)[0] / 2), y + 24 + 15 * i, 1, text[i], [255, 255, 255, 255], font);
+        Render.String(x + (Render.TextSize((text[i]), font)[0] / 2) , y + 24 + 15 * i, 1, text[i], [0, 0, 0, 255 / 1.3], font);
+        Render.String(x + (Render.TextSize((text[i]), font)[0] / 2) , y + 24 + 15 * i, 1, text[i], [255, 255, 255, 255], font);
     }
 
 
