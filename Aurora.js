@@ -403,11 +403,12 @@ menu.render = function () {
                 // first subtab
                 case 0:
                     menu.groupbox(menu.x + 110, menu.y + 35, 685, 460, "groupbox 3", false); {
-                        Render.String(menu.x + 120, menu.y + 65, 0, "Welcome to Aurora " + Cheat.GetUsername(), [255, 255, 255, 205], menu.font)
-                        Render.String(menu.x + 120, menu.y + 78, 0, "Join our discord for support", [255, 255, 255, 205], menu.font)
-                        Render.String(menu.x + 120, menu.y + 91, 0, "discord.buyaurora.today", [255, 255, 255, 205], menu.font)
-                        Render.String(menu.x + 120, menu.y + 104, 0, "Current version: V 2.0", [255, 255, 255, 205], menu.font)
+                        Render.String(menu.x + 120, menu.y + 91, 0, "Welcome to Aurora " + Cheat.GetUsername(), [255, 255, 255, 205], menu.font)
+                        Render.String(menu.x + 120, menu.y + 104, 0, "Join our discord for support", [255, 255, 255, 205], menu.font)
+                        Render.String(menu.x + 120, menu.y + 117, 0, "discord.buyaurora.today", [255, 255, 255, 205], menu.font)
+                        Render.String(menu.x + 120, menu.y + 130, 0, "Current version: V 2.0", [255, 255, 255, 205], menu.font)
                         menu.button("Load config", config_system.load);
+						menu.button("Reset config", config_system.reset);
                     }
                     break;
             }
@@ -516,7 +517,7 @@ menu.render = function () {
                     menu.groupbox(menu.x + 110, menu.y + 35, 340, 460, "groupbox 3", false); {
                         menu.combobox("Aurora Doubletap", ["None", "Fast", "Quick", "Supersonic"], "Aurora_doubletap");
                         function dtshow() {
-                            if (Aurora.ini_doubletap.value == 1 || Aurora.ini_doubletap.value == 2 || Aurora.ini_doubletap.value == 3) {
+                            if (menu.ini_doubletap.value == 1 || menu.ini_doubletap.value == 2 || menu.ini_doubletap.value == 3) {
                                 menu.checkbox("Fast Recharge", "fast_recharge");
                                 menu.checkbox("Recharge on swap", "weapon_swap_recharge");
                                 menu.checkbox("HP / 2", "mindmgdt")
