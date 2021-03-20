@@ -563,7 +563,7 @@ menu.render = function () {
                 // first subtab
                 case 0:
                     menu.groupbox(menu.x + 110, menu.y + 35, 340, 460, "groupbox 3", false); {
-                        menu.multibox("Indicators", ["Anti-Aim Side", "Anti-Aim Mode", "Doubletap", "Advanced Fakelag", "No-Scope"], "indicators");
+                        menu.multibox("Indicators", ["Anti-Aim Side", "Anti-Aim Mode", "Doubletap", "Advanced Fakelag", "No-Scope", "DMG Override"], "indicators");
                         menu.label(" ")
                         menu.checkbox("Hotkey List", "hotkey_list")
                         menu.label(" ")
@@ -1842,22 +1842,6 @@ function OnBulletImpact() {
     }
 }
 
-
-function customaa() {
-    if (config.aa_modes.value == 5) {
-        if (AntiAim.GetOverride() = 0) {
-            AntiAim.SetOverride(1)
-        } else {
-            var lbyoffset = config.customaa_lby.value
-            var realoffset = config.customaa_real.value
-            var fakeoffset = config.customaa_fake.value
-            AntiAim.SetLBYOffset(lbyoffset)
-            AntiAim.SetRealOffset(realoffset)
-            AntiAim.SetFakeOffset(fakeoffset)
-        }
-    }
-}
-
 // E Peek
 const time = Globals.Realtime();
 var currently_defusing = false;
@@ -2543,6 +2527,13 @@ function onIndicators() {
                 Render.ShadowString(x - 32, y - 10, 0, " NOSCOPE", [255, 29, 13, 255], font);
             } else {
                 Render.ShadowString(x - 32, y - 10, 0, " NOSCOPE", [31, 255, 87, 255], font);
+            }
+        }
+        if (getDropdownValue(config.indicators.value, 4)) {
+            if (config.dmg_override_key.active) {
+                Render.ShadowString(x - 32, y - 10, 0, "   DMG", [31, 255, 87, 255], font);
+            } else {
+                Render.ShadowString(x - 32, y - 10, 0, "   DMG", [255, 29, 13, 255], font);
             }
         }
     }
