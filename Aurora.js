@@ -147,6 +147,7 @@ const config = {
     fake_lag_max: slider_t(),
     indicators: dropdown_t(),
     hotkey_list: checkbox_t(),
+    bombindicator: checkbox_t(),
     aspect_ratio: checkbox_t(),
     aspect_ratio_slider: slider_t(),
     healthshot_effect: checkbox_t(),
@@ -605,6 +606,7 @@ menu.render = function () {
                         rainbowbar();
                         menu.label(" ")
                         menu.multibox("Misc. esp", ["Fish esp", "Chicken esp"], "customesp")
+                        menu.checkbox("Bomb Indicator", "bombindicator")
                     }
                     menu.groupbox(menu.x + 450, menu.y + 35, 340, 460, "groupbox 4", false); {
                         /*
@@ -1487,32 +1489,35 @@ function onAvoidHitboxes() {
     var weapon = Entity.GetWeapon(local)
     var name = Entity.GetName(weapon)
     var avoidhitboxes = config.avoid_hitboxes.value;
+    var safetycheck = Ragebot.GetTargetHitchance() <= 75
     var players = Entity.GetEnemies()
     players.forEach((function (player) {
-        if (avoidhitboxes & (1 << 0)) {
-            Ragebot.IgnoreTargetHitbox(player, 0);
-            Ragebot.IgnoreTargetHitbox(player, 1);
-        }
-        if (avoidhitboxes & (1 << 1)) {
-            Ragebot.IgnoreTargetHitbox(player, 5);
-        }
-        if (avoidhitboxes & (1 << 2)) {
-            Ragebot.IgnoreTargetHitbox(player, 6);
-        }
-        if (avoidhitboxes & (1 << 3)) {
-            Ragebot.IgnoreTargetHitbox(player, 2);
-            Ragebot.IgnoreTargetHitbox(player, 3);
-            Ragebot.IgnoreTargetHitbox(player, 4);
-        }
-        if (avoidhitboxes & (1 << 4)) {
-            Ragebot.IgnoreTargetHitbox(player, 7);
-            Ragebot.IgnoreTargetHitbox(player, 8);
-            Ragebot.IgnoreTargetHitbox(player, 9);
-            Ragebot.IgnoreTargetHitbox(player, 10);
-        }
-        if (avoidhitboxes & (1 << 5)) {
-            Ragebot.IgnoreTargetHitbox(player, 11);
-            Ragebot.IgnoreTargetHitbox(player, 12);
+        if (safetycheck) {
+            if (avoidhitboxes & (1 << 0)) {
+                Ragebot.IgnoreTargetHitbox(player, 0);
+                Ragebot.IgnoreTargetHitbox(player, 1);
+            }
+            if (avoidhitboxes & (1 << 1)) {
+                Ragebot.IgnoreTargetHitbox(player, 5);
+            }
+            if (avoidhitboxes & (1 << 2)) {
+                Ragebot.IgnoreTargetHitbox(player, 6);
+            }
+            if (avoidhitboxes & (1 << 3)) {
+                Ragebot.IgnoreTargetHitbox(player, 2);
+                Ragebot.IgnoreTargetHitbox(player, 3);
+                Ragebot.IgnoreTargetHitbox(player, 4);
+            }
+            if (avoidhitboxes & (1 << 4)) {
+                Ragebot.IgnoreTargetHitbox(player, 7);
+                Ragebot.IgnoreTargetHitbox(player, 8);
+                Ragebot.IgnoreTargetHitbox(player, 9);
+                Ragebot.IgnoreTargetHitbox(player, 10);
+            }
+            if (avoidhitboxes & (1 << 5)) {
+                Ragebot.IgnoreTargetHitbox(player, 11);
+                Ragebot.IgnoreTargetHitbox(player, 12);
+            }
         }
     }))
 }
@@ -1843,73 +1848,72 @@ function OnBulletImpact() {
 }
 
 // E Peek
-const time = Globals.Realtime();
-var currently_defusing = false;
-var Aurora_aa = true;
-var key_e = false;
-function KratoEPeek() {
-    var defusing = Entity.GetProp(Entity.GetLocalPlayer(), "CCSPlayer", "m_bIsDefusing")
-    var picking_hostage = Entity.GetProp(Entity.GetLocalPlayer(), "CCSPlayer", "m_bIsGrabbingHostage")
-    var holding = Entity.GetWeapon(Entity.GetLocalPlayer()) == 116;
-    var planted = Entity.GetEntitiesByClassID(128);
-    var buttons = UserCMD.GetButtons();
-
-    restrictions = UI.GetValue(["Config", "Cheat", "General", "Restrictions"]);
-    yaw_offset = UI.GetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"]);
-    jitter_offset = UI.GetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"]);
-    pitch_mode = UI.GetValue(["Rage", "Anti Aim", "General", "Pitch mode"]);
-    at_targets = UI.GetValue(["Rage", "Anti Aim", "Directions", "At targets"]);
-
-
-    if (!planted) {
-        onReset()
-    }
-
-    if (!currently_defusing && !picking_hostage && config.e_peek.active) {
-        AntiAim.SetOverride(1);
-        UI.SetValue(["Config", "Cheat", "General", "Restrictions"], 0);
-        UI.SetValue(["Rage", "Anti Aim", "General", "Pitch mode"], 0);
-        AntiAim.SetOverride(1)
-        AntiAim.SetLBYOffset(getMathRandom(168, 174));
-        UI.SetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"], 4);
-        UI.SetValue(["Rage", "Anti Aim", "General", "Key assignment", "Jitter"], 3);
-        UI.SetValue(["Rage", "Anti Aim", "Directions", "At targets"], 0);
-        key_e = false;
-        if (Globals.Realtime() >= time + 0.2) {
-            if (key_e == false) {
-                Cheat.ExecuteCommand("+use");
-                key_e = true;
-            }
-            if (key_e == true) {
-                Cheat.ExecuteCommand("-use");
-            }
-        } else if (key_e == true) {
-            Cheat.ExecuteCommand("-use");
-            key_e = false;
+function legit_aa2() {
+    if (config.e_peek.active) {
+        if (original_aa) {
+            restrictions_cache = UI.GetValue(["Config", "Cheat", "General", "Restrictions"])
+            yaw_offset_cache = UI.GetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"])
+            jitter_offset_cache = UI.GetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"])
+            pitch_cache = UI.GetValue(["Rage", "Anti Aim", "General", "Pitch mode"])
+            original_aa = false
         }
-    } else if (!Aurora_aa) {
-        UI.SetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"], yaw_offset);
-        UI.SetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"], jitter_offset);
-        UI.SetValue(["Rage", "Anti Aim", "General", "Pitch mode"], pitch_mode);
-        UI.SetValue(["Rage", "Anti Aim", "Directions", "At targets"], at_targets);
-        Aurora_aa = true;
-        currently_defusing = false;
-        currently_picking_hostage = false;
+        UI.SetValue(["Config", "Cheat", "General", "Restrictions"], 0);
+        UI.SetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"], 180);
+        UI.SetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"], 0);
+        UI.SetValue(["Rage", "Anti Aim", "General", "Pitch mode"], 0)
+        AntiAim.SetOverride(0)
+        IN_USE = UserCMD.GetButtons() & (1 << 5)
+        if (IN_USE) {
+            E = false;
+            if (Globals.Realtime() > legitaa_time + 0.2) {
+                if (E == false) {
+                    Cheat.ExecuteCommand("+use");
+                    E = true;
+                }
+                if (E == true) {
+                    Cheat.ExecuteCommand("-use");
+                }
+            }
+        } else {
+            if (E == true) {
+                Cheat.ExecuteCommand("-use")
+                E = false
+            }
+        }
     } else {
-        UI.SetValue(["Rage", "Anti Aim", "General", "Pitch mode"], 1);
+        if (!original_aa) {
+            UI.SetValue(["Config", "Cheat", "General", "Restrictions"], restrictions_cache)
+            UI.SetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"], yaw_offset_cache)
+            UI.SetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"], jitter_offset_cache)
+            UI.SetValue(["Rage", "Anti Aim", "General", "Pitch mode"], pitch_cache)
+            original_aa = true
+        }
+        legitaa_time = Global.Realtime();
     }
 }
-function Defusing() {
-    const userid = Entity.GetEntitiesByClassID(Event.GetString("userid"));
 
-    if (Entity.IsLocalPlayer(userid))
-        currently_defusing = true;
-    currently_picking_hostage = true;
-}
-
-function DefuseReset() {
-    currently_defusing = false;
-    currently_picking_hostage = false;
+function legit_aa() {
+    var C4 = Entity.GetEntitiesByClassID(129)[0]
+    var Host = Entity.GetEntitiesByClassID(97)[0]
+    if (C4) {
+        var C4Loc = Entity.GetRenderOrigin(C4)
+        var local = Entity.GetLocalPlayer()
+        var lLoc = Entity.GetRenderOrigin(local)
+        distance = calcDist(C4Loc, lLoc)
+        if (distance >= 100) {
+            legit_aa2()
+        }
+    } else if (Host) {
+        var HLoc = Entity.GetRenderOrigin(Host);
+        var local = Entity.GetLocalPlayer();
+        var lLoc = Entity.GetRenderOrigin(local)
+        distance1 = calcDist(HLoc, lLoc);
+        if (distance1 >= 100) {
+            legit_aa2()
+        }
+    } else {
+        legit_aa2()
+    }
 }
 
 
@@ -3071,6 +3075,83 @@ function onMinDmg() {
     }
 }
 
+
+function bombtimer() {
+    if (config.bombindicator.value) {
+        var c4 = Entity.GetEntitiesByClassID(129)[0];
+        if(c4 != undefined) {
+            var eLoc = Entity.GetRenderOrigin(c4);
+            var lLoc = Entity.GetRenderOrigin(Entity.GetLocalPlayer())
+            var distance = calcDist(eLoc, lLoc);
+            var willKill = false;
+            var dmg;
+            //player checks
+            var armor = Entity.GetProp(Entity.GetLocalPlayer(), "CCSPlayerResource", "m_iArmor"); // player armor
+            var health = Entity.GetProp(Entity.GetLocalPlayer(), "CBasePlayer", "m_iHealth"); // player health
+            //c4 things
+            var isbombticking = Entity.GetProp(c4, "CPlantedC4", "m_bBombTicking");
+            var timer = (Entity.GetProp(c4, "CPlantedC4", "m_flC4Blow") - Globals.Curtime()); // c4 left time
+            var c4length = Entity.GetProp(c4, "CPlantedC4", "m_flTimerLength");
+            var bar_length = (((Render.GetScreenSize()[1] - 50) / c4length) * (timer));
+            //defusing things
+            var deflength = Entity.GetProp(c4, "CPlantedC4", "m_flDefuseLength"); // length of defuse
+            var deftimer = (Entity.GetProp(c4, "CPlantedC4", "m_flDefuseCountDown") - Globals.Curtime()); // timer when defusing
+            var defbarlength = (((Render.GetScreenSize()[1] - 50) / deflength) * (deftimer)); // lenght for left bar
+            var isbeingdefused = Entity.GetProp(c4, "CPlantedC4", "m_hBombDefuser"); // check if bomb is being defused
+            var gotdefused = Entity.GetProp(c4, "CPlantedC4", "m_bBombDefused"); // check if bomb has or hasnt defused
+            const a = 450.7;
+            const b = 75.68;
+            const c = 789.2;
+            const d = (distance - b) / c;
+            var damage = a * Math.exp(-d * d);
+            if(armor > 0) {
+                var newDmg = damage * 0.5;
+                var armorDmg = (damage - newDmg) * 0.5;
+                if(armorDmg > armor) {
+                    armor = armor * (1 / .5);
+                    newDmg = damage - armorDmg;
+                }
+                damage = newDmg;
+            }
+            dmg = Math.ceil(damage);
+            if(dmg >= health) {
+                willKill = true;
+            } else {
+                willKill = false;
+            }
+            timer = parseFloat(timer.toPrecision(3));
+            timer2 = parseFloat(timer.toPrecision(2));
+            timer3 = parseFloat(timer.toPrecision(1));
+            if(!isbombticking) return;
+            if(gotdefused) return;
+            if(timer >= 0.1) {
+                Render.Indicator(getSite(c4) + timer.toFixed(1) + "s", [255, 255, 255, 255])
+            }
+            if(willKill) {
+                Render.Indicator("FATAL", [255, 0, 0, 255])
+            } else if(damage > 0.5) {
+                Render.Indicator("-" + dmg + "HP", [210, 216, 112, 255])
+            }
+            // defuse time bar
+            if(isbeingdefused > 0) {
+                if(timer > deflength && timer >= 0.1) {
+                    Render.FilledRect(0, 0, 10, Render.GetScreenSize()[1], [25, 25, 25, 120]);
+                    Render.FilledRect(0, Render.GetScreenSize()[1] - defbarlength, 10, Render.GetScreenSize()[1], [58, 191, 54, 120]);
+                    Render.Rect(0, 0, 10, Render.GetScreenSize()[1], [25, 25, 25, 120]);
+                } else {
+                    Render.FilledRect(0, 0, 10, Render.GetScreenSize()[1], [25, 25, 25, 120]);
+                    Render.FilledRect(0, Render.GetScreenSize()[1] - defbarlength, 10, Render.GetScreenSize()[1], [252, 18, 19, 120]);
+                    Render.Rect(0, 0, 10, Render.GetScreenSize()[1], [25, 25, 25, 120]);
+                }
+            }
+        }
+        if(planting) {
+            textsize_C4 = Render.TextSize(bombsiteonplant, fonts)[0] + 15;
+            Render.Indicator(bombsiteonplant, [210, 216, 112, 255])
+            Render.OutlineCircle(x + textsize_C4, y - 25 - add_y + 35, fill / 3.3, [255, 255, 255, 255])
+        }
+    }
+}
 
 
 
