@@ -139,6 +139,7 @@ const config = {
     mindmgdt: checkbox_t(),
     mindmgdt_hp: slider_t(),
     dmg_override: checkbox_t(),
+    dmg_override_value: slider_t(),
     dmg_override_key: hotkey_t(0x0, hotkey_mode_t.TOGGLE, false),
     advanced_fakelag: dropdown_t(),
     FLonRoundEnd: checkbox_t(),
@@ -408,7 +409,7 @@ menu.render = function () {
                         Render.String(menu.x + 120, menu.y + 117, 0, "discord.buyaurora.today", [255, 255, 255, 205], menu.font)
                         Render.String(menu.x + 120, menu.y + 130, 0, "Current version: V 2.0", [255, 255, 255, 205], menu.font)
                         menu.button("Load config", config_system.load);
-						menu.button("Reset config", config_system.reset);
+                        menu.button("Reset config", config_system.reset);
                     }
                     break;
             }
@@ -452,7 +453,8 @@ menu.render = function () {
                         menu.checkbox("Minumum damage override", "dmg_override")
                         function mindmg() {
                             if (config.dmg_override.value) {
-                                menu.slider("   Damage", "dmg_override_key", -1, 101, 1, false)
+                                menu.hotkey("   Min DMG Key", "dmg_override_key")
+                                menu.slider("   Damage", "dmg_override_value", -1, 101, 1, false)
                             }
                         }
                         mindmg()
@@ -2209,8 +2211,6 @@ const draggable = {
 };
 
 const AuroraHotkey = function () {
-    UI.SetValue(["Misc.", "Helpers", "General", "Show keybind states"], 0);
-    UI.SetValue(["Misc.", "Helpers", "General", "Show spectators"], 0);
     draggable.updateDraggables();
 };
 
@@ -3041,8 +3041,8 @@ function main_spec() {
     Render.String(x + width2 / 2 - (Render.TextSize("Spectators", font)[0] / 2) + 2, y + 9, 0, "Spectators", [0, 0, 0, salpha * 255 / 1.3], font);
     Render.String(x + width2 / 2 - (Render.TextSize("Spectators", font)[0] / 2) + 1, y + 8, 0, "Spectators", [255, 255, 255, salpha * 255], font);
     for (i = 0; i < text.length; i++) {
-        Render.String(x + (Render.TextSize((text[i]), font)[0] / 2) , y + 24 + 15 * i, 1, text[i], [0, 0, 0, 255 / 1.3], font);
-        Render.String(x + (Render.TextSize((text[i]), font)[0] / 2) , y + 24 + 15 * i, 1, text[i], [255, 255, 255, 255], font);
+        Render.String(x + (Render.TextSize((text[i]), font)[0] / 2), y + 24 + 15 * i, 1, text[i], [0, 0, 0, 255 / 1.3], font);
+        Render.String(x + (Render.TextSize((text[i]), font)[0] / 2), y + 24 + 15 * i, 1, text[i], [255, 255, 255, 255], font);
     }
 
 
@@ -3066,6 +3066,22 @@ function onFreestanding() {
         UI.SetValue(["Rage", "Anti Aim", "Directions", "At targets"], 1);
     }
 }
+
+function onMinDmg() {
+    /*    dmg_override: checkbox_t(),
+    dmg_override_value: slider_t(),
+    dmg_override_key: hotkey_t(0x0, hotkey_mode_t.TOGGLE, false),*/
+    if (config.dmg_override.value) {
+        var mindmg = config.dmg_override_value.value;
+        if (config.dmg_override_key.active && mindmg >= 0 && mindmg <= 100) {
+            var target = Ragebot.GetTarget()
+            Ragebot.ForceTargetMinimumDamage(target, mindmg)
+        }
+    }
+}
+
+
+
 
 
 // Upon startup shows Aurora ASCII art
