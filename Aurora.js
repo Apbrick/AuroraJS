@@ -1483,144 +1483,134 @@ var wep2tab = {
 };
 var tab_names = ["General", "USP", "Glock", "Five Seven", "Tec-9", "Deagle", "Revolver", "Dualies", "P250", "CZ-75", "Mac10", "P90", "MP5", "MP7", "MP9", "UMP45", "PP-Bizon", "M4A1-S", "M4A4", "AK47", "AUG", "SG553", "FAMAS", "GALIL", "AWP", "SSG08", "SCAR20", "G3SG1", "M249", "XM1014", "MAG7", "Negev", "Sawed off"];
 
-// Avoid unsafe Hitboxes
-function onAvoidHitboxes() {
-    var local = Entity.GetLocalPlayer()
-    var weapon = Entity.GetWeapon(local)
-    var name = Entity.GetName(weapon)
-    var avoidhitboxes = config.avoid_hitboxes.value;
-    var safetycheck = Ragebot.GetTargetHitchance() <= 75
-    var players = Entity.GetEnemies()
-    players.forEach((function (player) {
-        if (safetycheck) {
-            if (avoidhitboxes & (1 << 0)) {
+function onAvoidingHitboxes() {
+    Entity.GetEnemies().forEach((function (player) {
+        if (Ragebot.GetTargetHitchance() <= 75) {
+            if (config.avoid_hitboxes.value & (1 << 0)) {
                 Ragebot.IgnoreTargetHitbox(player, 0);
                 Ragebot.IgnoreTargetHitbox(player, 1);
             }
-            if (avoidhitboxes & (1 << 1)) {
+
+            if (config.avoid_hitboxes.value & (1 << 1)) {
                 Ragebot.IgnoreTargetHitbox(player, 5);
             }
-            if (avoidhitboxes & (1 << 2)) {
+
+            if (config.avoid_hitboxes.value & (1 << 2)) {
                 Ragebot.IgnoreTargetHitbox(player, 6);
             }
-            if (avoidhitboxes & (1 << 3)) {
+
+            if (config.avoid_hitboxes.value & (1 << 3)) {
                 Ragebot.IgnoreTargetHitbox(player, 2);
                 Ragebot.IgnoreTargetHitbox(player, 3);
                 Ragebot.IgnoreTargetHitbox(player, 4);
             }
-            if (avoidhitboxes & (1 << 4)) {
+
+            if (config.avoid_hitboxes.value & (1 << 4)) {
                 Ragebot.IgnoreTargetHitbox(player, 7);
                 Ragebot.IgnoreTargetHitbox(player, 8);
                 Ragebot.IgnoreTargetHitbox(player, 9);
                 Ragebot.IgnoreTargetHitbox(player, 10);
             }
-            if (avoidhitboxes & (1 << 5)) {
+
+            if (config.avoid_hitboxes.value & (1 << 5)) {
                 Ragebot.IgnoreTargetHitbox(player, 11);
                 Ragebot.IgnoreTargetHitbox(player, 12);
             }
         }
-    }))
+    }));
 }
 
-//Avoid unsafe Hitboxes
-
-// Forcesafety
-function onForceSafety() {
-    var local = Entity.GetLocalPlayer()
-    var weapon = Entity.GetWeapon(local)
-    var name = Entity.GetName(weapon)
-    var forcesafety = config.forcesafety.value;
-    var players = Entity.GetEnemies()
-    players.forEach((function (player) {
-        if (getDropdownValue(forcesafety, 0)) {
+function onForcingSafety() {
+    Entity.GetEnemies().forEach((function (player) {
+        if (getDropdownValue(config.forcesafety.value, 0)) {
             Ragebot.ForceHitboxSafety(player, 0);
             Ragebot.ForceHitboxSafety(player, 1);
         }
-        if (getDropdownValue(forcesafety, 1)) {
+
+        if (getDropdownValue(config.forcesafety.value, 1)) {
             Ragebot.ForceHitboxSafety(player, 5);
         }
-        if (getDropdownValue(forcesafety, 2)) {
+
+        if (getDropdownValue(config.forcesafety.value, 2)) {
             Ragebot.ForceHitboxSafety(player, 6);
         }
-        if (getDropdownValue(forcesafety, 3)) {
+
+        if (getDropdownValue(config.forcesafety.value, 3)) {
             Ragebot.ForceHitboxSafety(player, 2);
             Ragebot.ForceHitboxSafety(player, 3);
             Ragebot.ForceHitboxSafety(player, 4);
         }
-        if (getDropdownValue(forcesafety, 4)) {
+
+        if (getDropdownValue(config.forcesafety.value, 4)) {
             Ragebot.ForceHitboxSafety(player, 7);
             Ragebot.ForceHitboxSafety(player, 8);
             Ragebot.ForceHitboxSafety(player, 9);
             Ragebot.ForceHitboxSafety(player, 10);
         }
-        if (getDropdownValue(forcesafety, 5)) {
+
+        if (getDropdownValue(config.forcesafety.value, 5)) {
             Ragebot.ForceHitboxSafety(player, 11);
             Ragebot.ForceHitboxSafety(player, 12);
         }
-    }))
+    }));
 }
-// Forcesafety
 
-// Delay shot
-var last_shot_time = [];
-function onPlayerAlive() {
-    if (!config.delayshot.value) return;
-    var local = Entity.GetLocalPlayer();
-    if (!Entity.IsAlive(local)) return;
-    var enemies = Entity.GetEnemies();
-    for (var i = 0; i < enemies.length; i++) {
-        var enemy = enemies[i];
-        var dif = Globals.Tickcount() - last_shot_time[enemy];
-        var has_shot = dif >= 0 && dif <= 12;
-        if (!has_shot) Ragebot.IgnoreTarget(enemy);
+var lastTimeShot = [];
+
+function onDelayShot() {
+    if (config.delayshot.value) {
+        if (Entity.IsAlive(Entity.GetLocalPlayer())) {
+            for (var i = 0; i < Entity.GetEnemies().length; i++) {
+                if (!(Globals.Tickcount() - lastTimeShot[Entity.GetEnemies()[i]]) >= 0 && (Globals.Tickcount() - lastTimeShot[Entity.GetEnemies()[i]]) <= 12) {
+                    Ragebot.IgnoreTarget(Entity.GetEnemies()[i]);
+                }
+            }
+        }
     }
 }
-function onGetSooter() {
-    var shooter = Entity.GetEntityFromUserID(Event.GetInt("userid"));
-    last_shot_time[shooter] = Globals.Tickcount();
-}
-function onGetEntity() {
-    var entity = Entity.GetEntityFromUserID(Event.GetInt("userid"));
-    if (entity == Entity.GetLocalPlayer()) last_shot_time = [];
-}
-// Delayshot
 
-// In air hitchance
-function onHitchanceInAir() {
-    inAirHitchance = config.inair_weapons.value;
+
+function onDelayShot_getAttacker() {
+    lastTimeShot[Entity.GetEntityFromUserID(Event.GetInt("userid"))] = Globals.Tickcount();
+}
+
+function onDelayShot_getEntity() {
+    if (Entity.GetEntityFromUserID(Event.GetInt("userid")) == Entity.GetLocalPlayer()) {
+        lastTimeShot = [];
+    }
+}
+
+function onAirHitchance() {
     inAirOptions = config.inairoptions.value;
 
-    var localWeapon = Entity.GetName(Entity.GetWeapon(Entity.GetLocalPlayer()));
+    var localWeapon = ;
     var flags = Entity.GetProp(Entity.GetLocalPlayer(), 'CBasePlayer', 'm_fFlags');
 
-    var awpHitchance = config.awp_inair.value;
-    if (getDropdownValue(inAirHitchance, 0) && inAirOptions) {
-        if (localWeapon == 'awp') {
-            !(flags & 1 << 0) && !(flags & 1 << 18) && (target = Ragebot.GetTarget(), Ragebot.ForceTargetHitchance(target, awpHitchance));
+    if (getDropdownValue(config.inair_weapons.value, 0) && config.inairoptions.value) {
+        if (Entity.GetName(Entity.GetWeapon(Entity.GetLocalPlayer())) == 'awp') {
+            !(flags & 1 << 0) && !(flags & 1 << 18) && (target = Ragebot.GetTarget(), Ragebot.ForceTargetHitchance(target, onfig.awp_inair.value));
         }
     }
 
-    var scoutHitchance = config.scout_inair.value;
-    if (getDropdownValue(inAirHitchance, 1) && inAirOptions) {
-        if (localWeapon == 'ssg 08') {
-            !(flags & 1 << 0) && !(flags & 1 << 18) && (target = Ragebot.GetTarget(), Ragebot.ForceTargetHitchance(target, scoutHitchance));
+    if (getDropdownValue(config.inair_weapons.value, 1) && config.inairoptions.value) {
+        if (Entity.GetName(Entity.GetWeapon(Entity.GetLocalPlayer())) == 'ssg 08') {
+            !(flags & 1 << 0) && !(flags & 1 << 18) && (target = Ragebot.GetTarget(), Ragebot.ForceTargetHitchance(target, config.scout_inair.value));
         }
     }
 
-    var revolverHitchance = config.r8_inair.value;
-    if (getDropdownValue(inAirHitchance, 2) && inAirOptions) {
-        if (localWeapon == 'r8 revolver') {
-            !(flags & 1 << 0) && !(flags & 1 << 18) && (target = Ragebot.GetTarget(), Ragebot.ForceTargetHitchance(target, revolverHitchance));
+    if (getDropdownValue(config.inair_weapons.value, 2) && config.inairoptions.value) {
+        if (Entity.GetName(Entity.GetWeapon(Entity.GetLocalPlayer())) == 'r8 revolver') {
+            !(flags & 1 << 0) && !(flags & 1 << 18) && (target = Ragebot.GetTarget(), Ragebot.ForceTargetHitchance(target, config.r8_inair.value));
         }
     }
 
-    var smgHitchance = config.smg_inair.value;
-    if (getDropdownValue(inAirHitchance, 3) && inAirOptions) {
-        if (localWeapon == 'mp9' || localWeapon == 'mac 10' || localWeapon == 'pp bizon' || localWeapon == 'ump 45' || localWeapon == 'mp7' || localWeapon == 'p90' || localWeapon == 'mp5 sd') {
-            !(flags & 1 << 0) && !(flags & 1 << 18) && (target = Ragebot.GetTarget(), Ragebot.ForceTargetHitchance(target, smgHitchance));
+    if (getDropdownValue(config.inair_weapons.value, 3) && config.inairoptions.value) {
+        if (Entity.GetName(Entity.GetWeapon(Entity.GetLocalPlayer())) == 'mp9' || Entity.GetName(Entity.GetWeapon(Entity.GetLocalPlayer())) == 'mac 10' || Entity.GetName(Entity.GetWeapon(Entity.GetLocalPlayer())) == 'pp bizon' || Entity.GetName(Entity.GetWeapon(Entity.GetLocalPlayer())) == 'ump 45' || Entity.GetName(Entity.GetWeapon(Entity.GetLocalPlayer())) == 'mp7' || Entity.GetName(Entity.GetWeapon(Entity.GetLocalPlayer())) == 'p90' || Entity.GetName(Entity.GetWeapon(Entity.GetLocalPlayer())) == 'mp5 sd') {
+            !(flags & 1 << 0) && !(flags & 1 << 18) && (target = Ragebot.GetTarget(), Ragebot.ForceTargetHitchance(target, config.smg_inair.value));
         }
     }
 }
+
 // In air hitchance
 /*       None     */
 function AuroraNone() {
@@ -3043,10 +3033,9 @@ function main_spec() {
 
 
     if (Global.IsKeyPressed(1) && UI.IsMenuOpen()) {
-        const mouse_pos = Global.GetCursorPosition();
-        if (in_bounds(mouse_pos, x, y, x + width2, y + 30)) {
-            UI.SetValue(["Misc.", "Helpers", "General", "Spec x"], mouse_pos[0] - width2 / 2);
-            UI.SetValue(["Misc.", "Helpers", "General", "Spec y"], mouse_pos[1] - 20);
+        if (in_bounds(Global.GetCursorPosition(), x, y, x + width2, y + 30)) {
+            UI.SetValue(["Misc.", "Helpers", "General", "Spec x"], Global.GetCursorPosition()[0] - width2 / 2);
+            UI.SetValue(["Misc.", "Helpers", "General", "Spec y"], Global.GetCursorPosition()[1] - 20);
         }
     }
 }
@@ -3062,15 +3051,11 @@ function onFreestanding() {
     }
 }
 
-function onMinDmg() {
-    /*    dmg_override: checkbox_t(),
-    dmg_override_value: slider_t(),
-    dmg_override_key: hotkey_t(0x0, hotkey_mode_t.TOGGLE, false),*/
+function onDamageOverride() {
     if (config.dmg_override.value) {
-        var mindmg = config.dmg_override_value.value;
-        if (config.dmg_override_key.active && mindmg >= 0 && mindmg <= 100) {
+        if (config.dmg_override_key.active && config.dmg_override_value.value >= 0 && config.dmg_override_value.value <= 100) {
             var target = Ragebot.GetTarget()
-            Ragebot.ForceTargetMinimumDamage(target, mindmg)
+            Ragebot.ForceTargetMinimumDamage(target, config.dmg_override_value.value)
         }
     }
 }
@@ -3153,85 +3138,75 @@ function bombtimer() {
     }
 }
 
-
-
-
-// Upon startup shows Aurora ASCII art
-function Onstartup() {
-    var Variation = getMathRandom(1, 7);
-    if (Variation == 1) {
-        Cheat.Print("      _____                                     \n")
-        Cheat.Print("     /  _  \\  __ _________  ________________    \n")
-        Cheat.Print("    /  /_\\  \\|  |  \\_  __ \\/  _ \\_  __ \\__  \\  \n")
-        Cheat.Print("   /    |    \\  |  /|  | \\(  <_> )  | \\// __ \\_ \n")
-        Cheat.Print("   \\____|__  /____/ |__|   \\____/|__|  (____  / \n")
-        Cheat.Print("           \\/                               \\/  \n")
-    } else if (Variation == 2) {
-        Cheat.Print("  /$$$$$$                                                   \n")
-        Cheat.Print(" /$$__  $$                                                  \n")
-        Cheat.Print("| $$  \\ $$ /$$   /$$  /$$$$$$   /$$$$$$   /$$$$$$   /$$$$$$ \n")
-        Cheat.Print("| $$$$$$$$| $$  | $$ /$$__  $$ /$$__  $$ /$$__  $$ |____  $$\n")
-        Cheat.Print("| $$__  $$| $$  | $$| $$  \\__/| $$  \\ $$| $$  \\__/  /$$$$$$$\n")
-        Cheat.Print("| $$  | $$| $$  | $$| $$      | $$  | $$| $$       /$$__  $$\n")
-        Cheat.Print("| $$  | $$|  $$$$$$/| $$      |  $$$$$$/| $$      |  $$$$$$$\n")
-        Cheat.Print("|__/  |__/ \\______/ |__/       \\______/ |__/       \\_______/\n")
-    } else if (Variation == 3) {
-        Cheat.Print("      _/_/                                                                      \n")
-        Cheat.Print("   _/    _/     _/    _/      _/  _/_/       _/_/       _/  _/_/       _/_/_/   \n")
-        Cheat.Print("  _/_/_/_/     _/    _/      _/_/         _/    _/     _/_/         _/    _/    \n")
-        Cheat.Print(" _/    _/     _/    _/      _/           _/    _/     _/           _/    _/     \n")
-        Cheat.Print("_/    _/       _/_/_/      _/             _/_/       _/             _/_/_/      \n")
-    } else if (Variation == 4) {
-        Cheat.Print(" ______     __  __     ______     ______     ______     ______    \n")
-        Cheat.Print("/\\  __ \\   /\\ \\/\\ \\   /\\  == \\   /\\  __ \\   /\\  == \\   /\\  __ \\   \n")
-        Cheat.Print("\\ \\  __ \\  \\ \\ \\_\\ \\  \\ \\  __<   \\ \\ \\/\\ \\  \\ \\  __<   \\ \\  __ \\  \n")
-        Cheat.Print(" \\ \\_\\ \\_\\  \\ \\_____\\  \\ \\_\\ \\_\\  \\ \\_____\\  \\ \\_\\ \\_\\  \\ \\_\\ \\_\\ \n")
-        Cheat.Print("  \\/_/\\/_/   \\/_____/   \\/_/ /_/   \\/_____/   \\/_/ /_/   \\/_/\\/_/ \n")
-    } else if (Variation == 5) {
-        Cheat.Print("    ___                                        \n")
-        Cheat.Print("   /   |  __  __   _____  ____    _____  ____ _\n")
-        Cheat.Print("  / /| | / / / /  / ___/ / __ \\  / ___/ / __ `/\n")
-        Cheat.Print(" / ___ |/ /_/ /  / /    / /_/ / / /    / /_/ / \n")
-        Cheat.Print("/_/  |_|\\__,_/  /_/     \\____/ /_/     \\__,_/  \n")
-    } else if (Variation == 6) {
-        Cheat.Print("               AAA                                                                                                      \n")
-        Cheat.Print("              A:::A                                                                                                     \n")
-        Cheat.Print("             A:::::A                                                                                                    \n")
-        Cheat.Print("            A:::::::A                                                                                                   \n")
-        Cheat.Print("           A:::::::::A        uuuuuu    uuuuuu rrrrr   rrrrrrrrr      ooooooooooo   rrrrr   rrrrrrrrr   aaaaaaaaaaaaa   \n")
-        Cheat.Print("          A:::::A:::::A       u::::u    u::::u r::::rrr:::::::::r   oo:::::::::::oo r::::rrr:::::::::r  a::::::::::::a  \n")
-        Cheat.Print("         A:::::A A:::::A      u::::u    u::::u r:::::::::::::::::r o:::::::::::::::or:::::::::::::::::r aaaaaaaaa:::::a \n")
-        Cheat.Print("        A:::::A   A:::::A     u::::u    u::::u rr::::::rrrrr::::::ro:::::ooooo:::::orr::::::rrrrr::::::r         a::::a \n")
-        Cheat.Print("       A:::::A     A:::::A    u::::u    u::::u  r:::::r     r:::::ro::::o     o::::o r:::::r     r:::::r  aaaaaaa:::::a \n")
-        Cheat.Print("      A:::::AAAAAAAAA:::::A   u::::u    u::::u  r:::::r     rrrrrrro::::o     o::::o r:::::r     rrrrrrraa::::::::::::a \n")
-        Cheat.Print("     A:::::::::::::::::::::A  u::::u    u::::u  r:::::r            o::::o     o::::o r:::::r           a::::aaaa::::::a \n")
-        Cheat.Print("    A:::::AAAAAAAAAAAAA:::::A u:::::uuuu:::::u  r:::::r            o::::o     o::::o r:::::r          a::::a    a:::::a \n")
-        Cheat.Print("   A:::::A             A:::::Au:::::::::::::::uur:::::r            o:::::ooooo:::::o r:::::r          a::::a    a:::::a \n")
-        Cheat.Print("  A:::::A               A:::::Au:::::::::::::::ur:::::r            o:::::::::::::::o r:::::r          a:::::aaaa::::::a \n")
-        Cheat.Print(" A:::::A                 A:::::Auu::::::::uu:::ur:::::r             oo:::::::::::oo  r:::::r           a::::::::::aa:::a\n")
-        Cheat.Print("AAAAAAA                   AAAAAAA uuuuuuuu  uuuurrrrrrr               ooooooooooo    rrrrrrr            aaaaaaaaaa  aaaa\n")
-    } else if (Variation == 7) {
-        Cheat.Print("     _                             \n")
-        Cheat.Print("    / \\  _   _ _ __ ___  _ __ __ _ \n")
-        Cheat.Print("   / _ \\| | | | '__/ _ \\| '__/ _` |\n")
-        Cheat.Print("  / ___ \\ |_| | | | (_) | | | (_| |\n")
-        Cheat.Print(" /_/   \\_\\__,_|_|  \\___/|_|  \\__,_|\n")
-    } else {
-        Cheat.Print("      _____                                     \n")
-        Cheat.Print("     /  _  \\  __ _________  ________________    \n")
-        Cheat.Print("    /  /_\\  \\|  |  \\_  __ \\/  _ \\_  __ \\__  \\  \n")
-        Cheat.Print("   /    |    \\  |  /|  | \\(  <_> )  | \\// __ \\_ \n")
-        Cheat.Print("   \\____|__  /____/ |__|   \\____/|__|  (____  / \n")
-        Cheat.Print("           \\/                               \\/  \n")
+function onStartup() {
+    switch (getMathRandom(1, 7)) {
+        case 1:
+            Cheat.Print("      _____                                     \n");
+            Cheat.Print("     /  _  \\  __ _________  ________________    \n");
+            Cheat.Print("    /  /_\\  \\|  |  \\_  __ \\/  _ \\_  __ \\__  \\  \n");
+            Cheat.Print("   /    |    \\  |  /|  | \\(  <_> )  | \\// __ \\_ \n");
+            Cheat.Print("   \\____|__  /____/ |__|   \\____/|__|  (____  / \n");
+            Cheat.Print("           \\/                               \\/  \n");
+        case 2:
+            Cheat.Print("  /$$$$$$                                                   \n");
+            Cheat.Print(" /$$__  $$                                                  \n");
+            Cheat.Print("| $$  \\ $$ /$$   /$$  /$$$$$$   /$$$$$$   /$$$$$$   /$$$$$$ \n");
+            Cheat.Print("| $$$$$$$$| $$  | $$ /$$__  $$ /$$__  $$ /$$__  $$ |____  $$\n");
+            Cheat.Print("| $$__  $$| $$  | $$| $$  \\__/| $$  \\ $$| $$  \\__/  /$$$$$$$\n");
+            Cheat.Print("| $$  | $$| $$  | $$| $$      | $$  | $$| $$       /$$__  $$\n");
+            Cheat.Print("| $$  | $$|  $$$$$$/| $$      |  $$$$$$/| $$      |  $$$$$$$\n");
+            Cheat.Print("|__/  |__/ \\______/ |__/       \\______/ |__/       \\_______/\n");
+        case 3:
+            Cheat.Print("      _/_/                                                                      \n");
+            Cheat.Print("   _/    _/     _/    _/      _/  _/_/       _/_/       _/  _/_/       _/_/_/   \n");
+            Cheat.Print("  _/_/_/_/     _/    _/      _/_/         _/    _/     _/_/         _/    _/    \n");
+            Cheat.Print(" _/    _/     _/    _/      _/           _/    _/     _/           _/    _/     \n");
+            Cheat.Print("_/    _/       _/_/_/      _/             _/_/       _/             _/_/_/      \n");
+        case 4:
+            Cheat.Print(" ______     __  __     ______     ______     ______     ______    \n");
+            Cheat.Print("/\\  __ \\   /\\ \\/\\ \\   /\\  == \\   /\\  __ \\   /\\  == \\   /\\  __ \\   \n");
+            Cheat.Print("\\ \\  __ \\  \\ \\ \\_\\ \\  \\ \\  __<   \\ \\ \\/\\ \\  \\ \\  __<   \\ \\  __ \\  \n");
+            Cheat.Print(" \\ \\_\\ \\_\\  \\ \\_____\\  \\ \\_\\ \\_\\  \\ \\_____\\  \\ \\_\\ \\_\\  \\ \\_\\ \\_\\ \n");
+            Cheat.Print("  \\/_/\\/_/   \\/_____/   \\/_/ /_/   \\/_____/   \\/_/ /_/   \\/_/\\/_/ \n");
+        case 5:
+            Cheat.Print("    ___                                        \n");
+            Cheat.Print("   /   |  __  __   _____  ____    _____  ____ _\n");
+            Cheat.Print("  / /| | / / / /  / ___/ / __ \\  / ___/ / __ `/\n");
+            Cheat.Print(" / ___ |/ /_/ /  / /    / /_/ / / /    / /_/ / \n");
+            Cheat.Print("/_/  |_|\\__,_/  /_/     \\____/ /_/     \\__,_/  \n");
+        case 6:
+            Cheat.Print("               AAA                                                                                                      \n");
+            Cheat.Print("              A:::A                                                                                                     \n");
+            Cheat.Print("             A:::::A                                                                                                    \n");
+            Cheat.Print("            A:::::::A                                                                                                   \n");
+            Cheat.Print("           A:::::::::A        uuuuuu    uuuuuu rrrrr   rrrrrrrrr      ooooooooooo   rrrrr   rrrrrrrrr   aaaaaaaaaaaaa   \n");
+            Cheat.Print("          A:::::A:::::A       u::::u    u::::u r::::rrr:::::::::r   oo:::::::::::oo r::::rrr:::::::::r  a::::::::::::a  \n");
+            Cheat.Print("         A:::::A A:::::A      u::::u    u::::u r:::::::::::::::::r o:::::::::::::::or:::::::::::::::::r aaaaaaaaa:::::a \n");
+            Cheat.Print("        A:::::A   A:::::A     u::::u    u::::u rr::::::rrrrr::::::ro:::::ooooo:::::orr::::::rrrrr::::::r         a::::a \n");
+            Cheat.Print("       A:::::A     A:::::A    u::::u    u::::u  r:::::r     r:::::ro::::o     o::::o r:::::r     r:::::r  aaaaaaa:::::a \n");
+            Cheat.Print("      A:::::AAAAAAAAA:::::A   u::::u    u::::u  r:::::r     rrrrrrro::::o     o::::o r:::::r     rrrrrrraa::::::::::::a \n");
+            Cheat.Print("     A:::::::::::::::::::::A  u::::u    u::::u  r:::::r            o::::o     o::::o r:::::r           a::::aaaa::::::a \n");
+            Cheat.Print("    A:::::AAAAAAAAAAAAA:::::A u:::::uuuu:::::u  r:::::r            o::::o     o::::o r:::::r          a::::a    a:::::a \n");
+            Cheat.Print("   A:::::A             A:::::Au:::::::::::::::uur:::::r            o:::::ooooo:::::o r:::::r          a::::a    a:::::a \n");
+            Cheat.Print("  A:::::A               A:::::Au:::::::::::::::ur:::::r            o:::::::::::::::o r:::::r          a:::::aaaa::::::a \n");
+            Cheat.Print(" A:::::A                 A:::::Auu::::::::uu:::ur:::::r             oo:::::::::::oo  r:::::r           a::::::::::aa:::a\n");
+            Cheat.Print("AAAAAAA                   AAAAAAA uuuuuuuu  uuuurrrrrrr               ooooooooooo    rrrrrrr            aaaaaaaaaa  aaaa\n");
+        case 7:
+            Cheat.Print("     _                             \n");
+            Cheat.Print("    / \\  _   _ _ __ ___  _ __ __ _ \n");
+            Cheat.Print("   / _ \\| | | | '__/ _ \\| '__/ _` |\n");
+            Cheat.Print("  / ___ \\ |_| | | | (_) | | | (_| |\n");
+            Cheat.Print(" /_/   \\_\\__,_|_|  \\___/|_|  \\__,_|\n");
     }
 }
-Onstartup();
+
+onStartup();
 
 
-Cheat.RegisterCallback("CreateMove", "onAvoidHitboxes")
-Cheat.RegisterCallback("CreateMove", "onForceSafety")
-Cheat.RegisterCallback("CreateMove", "onPlayerAlive");
-Cheat.RegisterCallback("CreateMove", "onHitchanceInAir")
+Cheat.RegisterCallback("CreateMove", "onAvoidingHitboxes");
+Cheat.RegisterCallback("CreateMove", "onForcingSafety");
+Cheat.RegisterCallback("CreateMove", "onDelayShot");
+Cheat.RegisterCallback("CreateMove", "onAirHitchance")
 Cheat.RegisterCallback("CreateMove", "NoscopeDistance");
 Cheat.RegisterCallback("weapon_fire", "onGetSooter");
 Cheat.RegisterCallback("player_connect_full", "onGetEntity");
@@ -3272,7 +3247,7 @@ Cheat.RegisterCallback("Unload", "on_unload")
 Cheat.RegisterCallback("Draw", "DrawRainbow");
 Cheat.RegisterCallback("CreateMove", "benjiboost")
 Cheat.RegisterCallback("Draw", "onFogDraw")
-Cheat.RegisterCallback("CreateMove", "onMinDamage");
-Cheat.RegisterCallback("CreateMove", "dtonpeek")
-Cheat.RegisterCallback("Draw", "main_spec")
-Cheat.RegisterCallback("CreateMove", "onFreestanding")
+Cheat.RegisterCallback("CreateMove", "onDamageOverride");
+Cheat.RegisterCallback("CreateMove", "dtonpeek");
+Cheat.RegisterCallback("Draw", "main_spec");
+Cheat.RegisterCallback("CreateMove", "onFreestanding");
