@@ -1612,14 +1612,13 @@ function onAirHitchance() {
 }
 
 // In air hitchance
-/*       None     */
-function AuroraNone() {
-    if (config.aa_modes.value & (1 << 0)) {
-    }
-}
 
-/*  Simple Mode   */
-function AuroraSimple() {
+function onAntiAim() {
+    var Aurora_AA_RealOffset = getMathRandom(40, 48);
+    var Aurora_AA_Advanced_JITTER = getMathRandom(2, 10);
+    var Aurora_AA_FakeOffset = getMathRandom(25, 32);
+
+
     if (config.aa_modes.value & (1 << 1)) {
         UI.SetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"], 2);
         UI.SetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"], 16);
@@ -1628,17 +1627,7 @@ function AuroraSimple() {
         AntiAim.SetOverride(1);
         AntiAim.SetRealOffset(42);
         AntiAim.SetFakeOffset(getMathRandom(25, 32));
-    }
-}
-
-
-/* Advanced Mode  */
-
-function AuroraAdvanced() {
-    var Aurora_AA_RealOffset = getMathRandom(40, 48);
-    var Aurora_AA_Advanced_JITTER = getMathRandom(2, 10);
-    var Aurora_AA_FakeOffset = getMathRandom(25, 32);
-    if (config.aa_modes.value & (1 << 2)) {
+    } else if (config.aa_modes.value & (1 << 2)) {
         UI.SetValue(["Rage", "Anti Aim", "Directions", "Yaw offset"], 2);
         UI.SetValue(["Rage", "Anti Aim", "Directions", "Jitter offset"], Aurora_AA_Advanced_JITTER);
         UI.SetValue(["Rage", "Anti Aim", "Fake", "Lower body yaw mode"], 1);
@@ -1646,27 +1635,19 @@ function AuroraAdvanced() {
         AntiAim.SetOverride(1);
         AntiAim.SetRealOffset(Aurora_AA_RealOffset);
         AntiAim.SetFakeOffset(Aurora_AA_FakeOffset);
-    }
-}
-
-
-/* Aurora Mode  */
-function AuroraMode() {
-    var Auroramode = config.aa_modes.value & (1 << 3)
-    if (Auroramode && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "AA Direction inverter"]) || UI.GetValue(["Legit", "General", "General", "Key assignment", "AA Direction inverter"])) {
+    } else if (config.aa_modes.value & (1 << 3) && UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "AA Direction inverter"]) || UI.GetValue(["Legit", "General", "General", "Key assignment", "AA Direction inverter"])) {
         AntiAim.SetOverride(1)
         AntiAim.SetFakeOffset(Globals.Tickcount() % 4, 5 * 1 ? 3 : 3);
         AntiAim.SetRealOffset(getMathRandom(35, 25))
         AntiAim.SetLBYOffset(-10)
-    } else if (!UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "AA Direction inverter"]) || UI.GetValue(["Legit", "General", "General", "Key assignment", "AA Direction inverter"]) && Auroramode) {
+    } else if (!UI.GetValue(["Rage", "Anti Aim", "General", "Key assignment", "AA Direction inverter"]) || UI.GetValue(["Legit", "General", "General", "Key assignment", "AA Direction inverter"]) && config.aa_modes.value & (1 << 3)) {
         AntiAim.SetOverride(1)
         AntiAim.SetFakeOffset(Globals.Tickcount() % 4, 5 * 1 ? 5 : 5);
         AntiAim.SetRealOffset(getMathRandom(-35, -25))
         AntiAim.SetLBYOffset(9)
     }
+
 }
-
-
 //Anti-Brute mode
 
 function radian(degree) {
@@ -3064,7 +3045,7 @@ function onDamageOverride() {
 function bombtimer() {
     if (config.bombindicator.value) {
         var c4 = Entity.GetEntitiesByClassID(129)[0];
-        if(c4 != undefined) {
+        if (c4 != undefined) {
             var eLoc = Entity.GetRenderOrigin(c4);
             var lLoc = Entity.GetRenderOrigin(Entity.GetLocalPlayer())
             var distance = calcDist(eLoc, lLoc);
@@ -3089,17 +3070,17 @@ function bombtimer() {
             const c = 789.2;
             const d = (distance - b) / c;
             var damage = a * Math.exp(-d * d);
-            if(armor > 0) {
+            if (armor > 0) {
                 var newDmg = damage * 0.5;
                 var armorDmg = (damage - newDmg) * 0.5;
-                if(armorDmg > armor) {
+                if (armorDmg > armor) {
                     armor = armor * (1 / .5);
                     newDmg = damage - armorDmg;
                 }
                 damage = newDmg;
             }
             dmg = Math.ceil(damage);
-            if(dmg >= health) {
+            if (dmg >= health) {
                 willKill = true;
             } else {
                 willKill = false;
@@ -3107,19 +3088,19 @@ function bombtimer() {
             timer = parseFloat(timer.toPrecision(3));
             timer2 = parseFloat(timer.toPrecision(2));
             timer3 = parseFloat(timer.toPrecision(1));
-            if(!isbombticking) return;
-            if(gotdefused) return;
-            if(timer >= 0.1) {
+            if (!isbombticking) return;
+            if (gotdefused) return;
+            if (timer >= 0.1) {
                 Render.Indicator(getSite(c4) + timer.toFixed(1) + "s", [255, 255, 255, 255])
             }
-            if(willKill) {
+            if (willKill) {
                 Render.Indicator("FATAL", [255, 0, 0, 255])
-            } else if(damage > 0.5) {
+            } else if (damage > 0.5) {
                 Render.Indicator("-" + dmg + "HP", [210, 216, 112, 255])
             }
             // defuse time bar
-            if(isbeingdefused > 0) {
-                if(timer > deflength && timer >= 0.1) {
+            if (isbeingdefused > 0) {
+                if (timer > deflength && timer >= 0.1) {
                     Render.FilledRect(0, 0, 10, Render.GetScreenSize()[1], [25, 25, 25, 120]);
                     Render.FilledRect(0, Render.GetScreenSize()[1] - defbarlength, 10, Render.GetScreenSize()[1], [58, 191, 54, 120]);
                     Render.Rect(0, 0, 10, Render.GetScreenSize()[1], [25, 25, 25, 120]);
@@ -3130,7 +3111,7 @@ function bombtimer() {
                 }
             }
         }
-        if(planting) {
+        if (planting) {
             textsize_C4 = Render.TextSize(bombsiteonplant, fonts)[0] + 15;
             Render.Indicator(bombsiteonplant, [210, 216, 112, 255])
             Render.OutlineCircle(x + textsize_C4, y - 25 - add_y + 35, fill / 3.3, [255, 255, 255, 255])
@@ -3237,10 +3218,7 @@ Cheat.RegisterCallback("player_connect_full", "DefuseReset");
 Cheat.RegisterCallback("bomb_abortdefuse", "DefuseReset");
 Cheat.RegisterCallback("player_hurt", "OnHurt");
 Cheat.RegisterCallback("bullet_impact", "OnBulletImpact");
-Cheat.RegisterCallback("CreateMove", "AuroraMode");
-Cheat.RegisterCallback("CreateMove", "AuroraAdvanced");
-Cheat.RegisterCallback("CreateMove", "AuroraSimple");
-Cheat.RegisterCallback("CreateMove", "AuroraNone");
+Cheat.RegisterCallback("CreateMove", "onAntiAim");
 Cheat.RegisterCallback("Draw", "on_paint")
 Cheat.RegisterCallback("CreateMove", "on_cmove")
 Cheat.RegisterCallback("Unload", "on_unload")
